@@ -1,40 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/icon_settings.dart';
+import 'package:provider/provider.dart';
 
-final homePageStore = HomePageStore();
-
-class BluetoothSetting extends StatelessWidget implements IconSettings {
+class BluetoothSetting extends StatelessWidget {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   final List<BluetoothDevice> devicesList = new List<BluetoothDevice>();
   final Map<Guid, List<int>> readValues = new Map<Guid, List<int>>();
 
-  @override
-  Icon getIcon() {
-    Color color = Colors.blueAccent;
-    print("I: " + homePageStore.currentPageIndex.value.toString());
-    if (homePageStore.currentPageIndex.value == 3) color = Colors.pinkAccent;
-    return Icon(Icons.bluetooth_disabled, color: color);
+  Icon getBottomIcon(BuildContext context) {
+    final homePageStore = Provider.of<HomePageStore>(context);
+
+    Color color = Colors.white;
+    IconData icon = Icons.bluetooth_searching;
+    //print("I: " + homePageStore.currentPageIndex.toString());
+    //print("PageIndex: "+homePageStore.bluetoothPageIndex.toString());
+    //print("bluetoothState: "+homePageStore.bluetoothState.toString());
+    if (homePageStore.bluetoothState == BluetoothState.off) {
+      icon = Icons.bluetooth_disabled;
+      color = Colors.red;
+    } else if (homePageStore.bluetoothState == BluetoothState.on) {
+      icon = Icons.bluetooth_connected;
+      color = Colors.lightBlueAccent;
+    } else if (homePageStore.bluetoothState == BluetoothState.unavailable) {
+      icon = Icons.bluetooth_disabled;
+      color = Colors.red;
+    } else if (homePageStore.bluetoothState == BluetoothState.unauthorized) {
+      icon = Icons.lock;
+      color = Colors.red;
+    }
+
+    return Icon(icon, color: color);
   }
 
   @override
   Widget build(BuildContext context) {
+    final homePageStore = Provider.of<HomePageStore>(context);
+
     return StreamBuilder<BluetoothState>(
       stream: flutterBlue.state,
-      initialData: BluetoothState.unknown,
+      initialData: homePageStore.bluetoothState,
       builder: (c, snapshot) {
-        final state = snapshot.data;
-        return BluetoothStatusScreen(state: state);
+        flutterBlue.state.listen((state) {
+          if(state!=homePageStore.bluetoothState)
+            homePageStore.setBluetoothState(state);
+          //print("State: " + homePageStore.bluetoothState.toString());
+        }).onError((e) {
+          if (e.toString().contains("unavailable")) {
+            homePageStore.setBluetoothState(BluetoothState.unavailable);
+          }
+          if (e.toString().contains("unauthorized")) {
+            homePageStore.setBluetoothState(BluetoothState.unauthorized);
+          }
+          //print("Err.State: " + homePageStore.bluetoothState.toString());
+        });
+        return BluetoothStatusScreen();
       },
     );
   }
 }
 
 class BluetoothStatusScreen extends StatelessWidget {
-  const BluetoothStatusScreen({Key key, this.state}) : super(key: key);
 
-  final BluetoothState state;
+  Icon getIcon(BuildContext context) {
+    final homePageStore = Provider.of<HomePageStore>(context);
+
+    Color color = Colors.white;
+    IconData icon = Icons.bluetooth_searching;
+    //print("I: " + homePageStore.currentPageIndex.toString());
+    //print("PageIndex: "+homePageStore.bluetoothPageIndex.toString());
+    if (homePageStore.bluetoothState == BluetoothState.off) {
+      icon = Icons.bluetooth_disabled;
+      color = Colors.red;
+    } else if (homePageStore.bluetoothState == BluetoothState.on) {
+      icon = Icons.bluetooth_connected;
+      color = Colors.lightBlueAccent;
+    } else if (homePageStore.bluetoothState == BluetoothState.unavailable) {
+      icon = Icons.bluetooth_disabled;
+      color = Colors.red;
+    } else if (homePageStore.bluetoothState == BluetoothState.unauthorized) {
+      icon = Icons.lock;
+      color = Colors.red;
+    }
+
+    return Icon(icon, color: color, size: 200.0);
+  }
+
+  Text getText(BuildContext context) {
+    final homePageStore = Provider.of<HomePageStore>(context);
+    String text = "";
+
+    //print("I: " + homePageStore.currentPageIndex.toString());
+    //print("PageIndex: "+homePageStore.bluetoothPageIndex.toString());
+    if (homePageStore.currentPageIndex == homePageStore.bluetoothPageIndex) {
+      if (homePageStore.bluetoothState != null) {
+        if (homePageStore.bluetoothState == BluetoothState.off) {
+          text = "off.\nPlease turn it on.";
+        } else if (homePageStore.bluetoothState == BluetoothState.on) {
+          text = "on.";
+        } else if (homePageStore.bluetoothState == BluetoothState.unavailable) {
+          text = "unavaible.\nNot found on your device.";
+        } else if (homePageStore.bluetoothState == BluetoothState.unauthorized) {
+          text = "unauthorized.\nPlease give the app permissions.";
+        } else {
+          text = homePageStore.bluetoothState.toString().substring(15);
+        }
+      }
+    }
+
+    return Text(
+      "Bluetooth Adapter is " + text,
+      style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+      textAlign: TextAlign.center,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +124,8 @@ class BluetoothStatusScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(
-              Icons.bluetooth_disabled,
-              size: 200.0,
-              color: (state == BluetoothState.off) ? Colors.red : Colors.lightBlueAccent,
-            ),
-            Text(
-              'Bluetooth Adapter is ${state != null ? state.toString().substring(15) : 'not available'}' +
-                  ((state == BluetoothState.off) ? "\nPlease, turn it on." : ""),
-              style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
-              textAlign: TextAlign.center,
-            ),
+            Observer(builder: (_) => getIcon(context)),
+            Observer(builder: (_) => getText(context)),
           ],
         ),
       ),

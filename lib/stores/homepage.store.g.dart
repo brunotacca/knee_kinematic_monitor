@@ -12,14 +12,14 @@ mixin _$HomePageStore on _HomePageStore, Store {
   final _$bluetoothStateAtom = Atom(name: '_HomePageStore.bluetoothState');
 
   @override
-  Observable<BluetoothState> get bluetoothState {
+  BluetoothState get bluetoothState {
     _$bluetoothStateAtom.context.enforceReadPolicy(_$bluetoothStateAtom);
     _$bluetoothStateAtom.reportObserved();
     return super.bluetoothState;
   }
 
   @override
-  set bluetoothState(Observable<BluetoothState> value) {
+  set bluetoothState(BluetoothState value) {
     _$bluetoothStateAtom.context.conditionallyRunInAction(() {
       super.bluetoothState = value;
       _$bluetoothStateAtom.reportChanged();
@@ -29,14 +29,14 @@ mixin _$HomePageStore on _HomePageStore, Store {
   final _$currentPageIndexAtom = Atom(name: '_HomePageStore.currentPageIndex');
 
   @override
-  Observable<int> get currentPageIndex {
+  int get currentPageIndex {
     _$currentPageIndexAtom.context.enforceReadPolicy(_$currentPageIndexAtom);
     _$currentPageIndexAtom.reportObserved();
     return super.currentPageIndex;
   }
 
   @override
-  set currentPageIndex(Observable<int> value) {
+  set currentPageIndex(int value) {
     _$currentPageIndexAtom.context.conditionallyRunInAction(() {
       super.currentPageIndex = value;
       _$currentPageIndexAtom.reportChanged();

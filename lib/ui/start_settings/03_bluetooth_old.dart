@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/icon_settings.dart';
 
-final homePageStore = HomePageStore();
-
-class BluetoothSetting extends StatefulWidget implements IconSettings {
+class BluetoothSetting extends StatefulWidget {
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   final List<BluetoothDevice> devicesList = new List<BluetoothDevice>();
   final Map<Guid, List<int>> readValues = new Map<Guid, List<int>>();
@@ -13,14 +9,6 @@ class BluetoothSetting extends StatefulWidget implements IconSettings {
   @override
   _BluetoothSettingState createState() => _BluetoothSettingState();
 
-  @override
-  Icon getIcon() {
-    Color color = Colors.white;
-    print("I: "+homePageStore.currentPageIndex.value.toString());
-    if(homePageStore.currentPageIndex.value==3) 
-      color = Colors.pinkAccent;
-    return Icon(Icons.bluetooth_disabled, color: color);
-  }
 }
 
 class _BluetoothSettingState extends State<BluetoothSetting> {
