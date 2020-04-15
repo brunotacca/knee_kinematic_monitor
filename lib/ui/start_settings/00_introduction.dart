@@ -11,7 +11,7 @@ class _IntroductionPageState extends State<IntroductionPage> {
     return Container(
       child: Center(
         child: Text(
-          "Introduction Page",
+          "Introduction Page - Instructions about the app",
           style: TextStyle(color: Colors.white),
         ),
       ),

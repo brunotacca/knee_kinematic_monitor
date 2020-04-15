@@ -11,7 +11,7 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
     return Container(
       child: Center(
         child: Text(
-          "Device Configuration",
+          "Device Configuration - Check device connectivity",
           style: TextStyle(color: Colors.white),
         ),
       ),

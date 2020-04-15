@@ -1,38 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:page_view_indicators/linear_progress_page_indicator.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/00_introduction.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/01_body_placement.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/02_gps_location.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/03_bluetooth.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/04_connected_device.dart';
 
-final homePageStore = HomePageStore();
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
 
-class HomePage extends StatelessWidget {
-  final _pageController = PageController();
-  final _currentPageNotifier = ValueNotifier<int>(0);
-
-  static final introductionPage = IntroductionPage();
-  static final bodyPlacementSetting = BodyPlacementSetting();
-  static final gpsSetting = GpsSetting();
-  static final bluetoothSetting = BluetoothSetting();
-  static final connectedDeviceSetting = ConnectedDeviceSetting();
-
-  static final _settingsItems = [
-    introductionPage,
-    bodyPlacementSetting,
-    gpsSetting,
-    bluetoothSetting,
-    connectedDeviceSetting
+class _HomePageState extends State<HomePage> {
+  static int _initalPage = 3;
+  final _pageController = PageController(initialPage: _initalPage);
+  final _currentPageNotifier = ValueNotifier<int>(_initalPage);
+  final _settingsItems = [
+    IntroductionPage(),
+    BodyPlacementSetting(),
+    GpsSetting(),
+    BluetoothSetting(),
+    ConnectedDeviceSetting()
   ];
 
-  final introductionPageIndex = _settingsItems.indexOf(introductionPage);
-  final bodyPlacementPageIndex = _settingsItems.indexOf(bodyPlacementSetting);
-  final gpsPageIndex = _settingsItems.indexOf(gpsSetting);
-  final bluetoothPageIndex = _settingsItems.indexOf(bluetoothSetting);
-  final connectedDevicePageIndex = _settingsItems.indexOf(connectedDeviceSetting);
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +69,12 @@ class HomePage extends StatelessWidget {
               icon: Icon(Icons.location_off, color: _getBottomBarIconColor(2)),
               onPressed: () {},
             ),
-            Observer(
-              builder: (_) => IconButton(
-                icon: bluetoothSetting.getIcon(), //_getBottomBarBluetoothIcon(),
-                color: _getBottomBarIconColor(3),
-                onPressed: () {},
-              ),
+            IconButton(
+              icon: _getBottomBarBluetoothIcon(),
+              color: _getBottomBarIconColor(3),
+              onPressed: () {
+                _pageController.jumpToPage(3);
+              },
             ),
             IconButton(
               icon: Icon(Icons.device_hub, color: _getBottomBarIconColor(4)),
@@ -109,8 +103,9 @@ class HomePage extends StatelessWidget {
               return _settingsItems[index];
             },
             onPageChanged: (int index) {
-              homePageStore.setCurrentPageIndex(index);
-              _currentPageNotifier.value = index;
+              setState(() {
+                _currentPageNotifier.value = index;
+              });
             }),
       ),
     );
@@ -118,29 +113,15 @@ class HomePage extends StatelessWidget {
 
   _buildLinearProgressIndicator() {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) => Observer(
-        builder: (_) => LinearProgressPageIndicator(
-          itemCount: _settingsItems.length,
-          currentPageNotifier: _currentPageNotifier,
-          progressColor: _getProgressIndicatorColor(),
-          backgroundColor: Color.fromRGBO(158, 166, 186, 0.1),
-          width: constraints.maxWidth,
-          height: 10,
-        ),
+      builder: (BuildContext context, BoxConstraints constraints) => LinearProgressPageIndicator(
+        itemCount: _settingsItems.length,
+        currentPageNotifier: _currentPageNotifier,
+        progressColor: (_currentPageNotifier.value == 0) ? Colors.grey : Colors.lightGreenAccent,
+        backgroundColor: Color.fromRGBO(158, 166, 186, 0.1),
+        width: constraints.maxWidth,
+        height: 10,
       ),
     );
-  }
-
-  Color _getProgressIndicatorColor() {
-    if (homePageStore.currentPageIndex?.value == 0)
-      return Colors.grey;
-    else {
-      if (homePageStore.currentPageIndex.value == 3) {
-        return Colors.lightGreenAccent;
-      }
-    }
-    return Colors.yellow;
-    //(homePageStore.currentPageIndex?.value == 0) ? Colors.grey : Colors.lightGreenAccent,
   }
 
   Color _getBottomBarIconColor(int iconIndex) {
@@ -156,4 +137,5 @@ class HomePage extends StatelessWidget {
   Icon _getBottomBarBluetoothIcon() {
     return Icon(Icons.bluetooth_disabled, color: Colors.white);
   }
+
 }

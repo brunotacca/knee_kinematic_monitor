@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-class BluetoothSetting extends StatefulWidget {
+class GpsSetting extends StatefulWidget {
   @override
-  _BluetoothSettingState createState() => _BluetoothSettingState();
+  _GpsSettingState createState() => _GpsSettingState();
 }
 
-class _BluetoothSettingState extends State<BluetoothSetting> {
+class _GpsSettingState extends State<GpsSetting> {
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Center(
         child: Text(
-          "Bluetooth Configuration",
+          "GPS Configuration - Check GPS Service",
           style: TextStyle(color: Colors.white),
         ),
       ),

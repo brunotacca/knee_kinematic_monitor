@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/home_page.dart';
-//import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/list_page.dart';
 
 void main() => runApp(new MyApp());
 

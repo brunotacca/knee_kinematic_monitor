@@ -11,7 +11,7 @@ class _BodyPlacementSettingState extends State<BodyPlacementSetting> {
     return Container(
       child: Center(
         child: Text(
-          "Body Configuration",
+          "Body Configuration - How to Place the Device on the Body",
           style: TextStyle(color: Colors.white),
         ),
       ),
