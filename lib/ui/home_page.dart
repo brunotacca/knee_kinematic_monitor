@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:page_view_indicators/linear_progress_page_indicator.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
@@ -10,10 +9,7 @@ import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/03_bluetoo
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/04_connected_device.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
-  final _pageController = PageController();
-  final _currentPageNotifier = ValueNotifier<int>(0);
-  
+class HomePage extends StatefulWidget {
   static final introductionPage = IntroductionPage();
   static final bodyPlacementSetting = BodyPlacementSetting();
   static final gpsSetting = GpsSetting();
@@ -29,52 +25,50 @@ class HomePage extends StatelessWidget {
   ];
 
   @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _pageController = PageController();
+
+  final _currentPageNotifier = ValueNotifier<int>(0);
+
+  @override
   Widget build(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
-    homePageStore.introductionPageIndex = _settingsItems.indexOf(introductionPage);
-    homePageStore.bodyPlacementPageIndex = _settingsItems.indexOf(bodyPlacementSetting);
-    homePageStore.gpsPageIndex = _settingsItems.indexOf(gpsSetting);
-    homePageStore.bluetoothPageIndex = _settingsItems.indexOf(bluetoothSetting);
-    homePageStore.connectedDevicePageIndex = _settingsItems.indexOf(connectedDeviceSetting);
+    homePageStore.introductionPageIndex = HomePage._settingsItems.indexOf(HomePage.introductionPage);
+    homePageStore.bodyPlacementPageIndex = HomePage._settingsItems.indexOf(HomePage.bodyPlacementSetting);
+    homePageStore.gpsPageIndex = HomePage._settingsItems.indexOf(HomePage.gpsSetting);
+    homePageStore.bluetoothPageIndex = HomePage._settingsItems.indexOf(HomePage.bluetoothSetting);
+    homePageStore.connectedDevicePageIndex = HomePage._settingsItems.indexOf(HomePage.connectedDeviceSetting);
 
     _buildPageView() {
       return Expanded(
         child: Container(
-          child: PageView.builder(
-            itemCount: _settingsItems.length,
-            controller: _pageController,
-            itemBuilder: (BuildContext context, int index) {
-              return _settingsItems[index];
-            },
-            onPageChanged: (int index) {
-              homePageStore.setCurrentPageIndex(index);
-              _currentPageNotifier.value = index;
-            },
+          child: Observer(
+            builder: (_) => PageView.builder(
+              itemCount: homePageStore.pageViewItemCountManaged,
+              controller: _pageController,
+              itemBuilder: (BuildContext context, int index) {
+                return HomePage._settingsItems[index];
+              },
+              onPageChanged: (int index) {
+                homePageStore.setCurrentPageIndex(index);
+                _currentPageNotifier.value = index;
+              },
+            ),
           ),
         ),
       );
-    }
-
-    Color _getProgressIndicatorColor() {
-      if (homePageStore.currentPageIndex == 0) {
-        return Colors.grey;
-      } else {
-        if(homePageStore.bluetoothState == BluetoothState.off 
-        || homePageStore.bluetoothState == BluetoothState.unavailable
-        || homePageStore.bluetoothState == BluetoothState.unauthorized) {
-          return Colors.red;
-        }
-      }
-      return Colors.lightGreenAccent;
     }
 
     _buildLinearProgressIndicator() {
       return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) => Observer(
           builder: (_) => LinearProgressPageIndicator(
-            itemCount: _settingsItems.length,
+            itemCount: HomePage._settingsItems.length,
             currentPageNotifier: _currentPageNotifier,
-            progressColor: _getProgressIndicatorColor(),
+            progressColor: homePageStore.progressBarColor,
             backgroundColor: Color.fromRGBO(158, 166, 186, 0.1),
             width: constraints.maxWidth,
             height: 10,
@@ -85,12 +79,6 @@ class HomePage extends StatelessWidget {
 
     Color _getBottomBarIconColor(int iconIndex) {
       return (_currentPageNotifier.value >= iconIndex ? Colors.lightGreenAccent : Colors.white);
-    }
-
-    Icon _getBottomBarFavoriteIcon() {
-      return (_currentPageNotifier.value == 0
-          ? Icon(Icons.favorite_border, color: Colors.white)
-          : Icon(Icons.favorite, color: Colors.red));
     }
 
     final topAppBar = AppBar(
@@ -120,21 +108,27 @@ class HomePage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            IconButton(
-              icon: _getBottomBarFavoriteIcon(),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.directions_walk, color: _getBottomBarIconColor(1)),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.location_off, color: _getBottomBarIconColor(2)),
-              onPressed: () {},
+            Observer(
+              builder: (_) => IconButton(
+                icon: HomePage.introductionPage.getBottomIcon(context),
+                onPressed: () {},
+              ),
             ),
             Observer(
               builder: (_) => IconButton(
-                icon: bluetoothSetting.getBottomIcon(context),
+                icon: HomePage.bodyPlacementSetting.getBottomIcon(context),
+                onPressed: () {},
+              ),
+            ),
+            Observer(
+              builder: (_) => IconButton(
+                icon: HomePage.gpsSetting.getBottomIcon(context),
+                onPressed: () {},
+              ),
+            ),
+            Observer(
+              builder: (_) => IconButton(
+                icon: HomePage.bluetoothSetting.getBottomIcon(context),
                 onPressed: () {},
               ),
             ),

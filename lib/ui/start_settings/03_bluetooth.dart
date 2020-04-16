@@ -45,8 +45,13 @@ class BluetoothSetting extends StatelessWidget {
         flutterBlue.state.listen((state) {
           if(state!=homePageStore.bluetoothState)
             homePageStore.setBluetoothState(state);
-          //print("State: " + homePageStore.bluetoothState.toString());
+            if(state == BluetoothState.on) {
+              homePageStore.setBluetoothPageDone(true);
+            } else {
+              homePageStore.setBluetoothPageDone(false);
+            }
         }).onError((e) {
+          homePageStore.setBluetoothPageDone(false);
           if (e.toString().contains("unavailable")) {
             homePageStore.setBluetoothState(BluetoothState.unavailable);
           }
