@@ -44,13 +44,9 @@ class _HomePageState extends State<HomePage> {
     homePageStore.bluetoothPageIndex = HomePage._settingsItems.indexOf(HomePage.bluetoothSetting);
     homePageStore.connectedDevicePageIndex = HomePage._settingsItems.indexOf(HomePage.connectedDeviceSetting);
 
-    widget.flutterBlue.state.listen((state) {
-      if (homePageStore.currentPageIndex > homePageStore.bluetoothPageIndex) {
-        if (homePageStore.bluetoothState == BluetoothState.on && state != BluetoothState.on) {
-          _pageController.animateTo(homePageStore.bluetoothPageIndex.toDouble(), duration: Duration(seconds: 1), curve: null);
-        }
-      }
-    });
+    HomePage.bluetoothSetting.configureListeners(context);
+    HomePage.gpsSetting.configureListeners(context);
+    homePageStore.pageController = _pageController;
 
     _buildPageView() {
       return Expanded(
@@ -58,7 +54,7 @@ class _HomePageState extends State<HomePage> {
           child: Observer(
             builder: (_) => PageView.builder(
               itemCount: homePageStore.pageViewItemCountManaged,
-              controller: _pageController,
+              controller: homePageStore.pageController,
               itemBuilder: (BuildContext context, int index) {
                 return HomePage._settingsItems[index];
               },

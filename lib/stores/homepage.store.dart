@@ -13,6 +13,7 @@ abstract class _HomePageStore with Store {
   int gpsPageIndex = -1;
   int bluetoothPageIndex = -1;
   int connectedDevicePageIndex = -1;
+  PageController pageController;
 
   @observable
   bool introductionPageDone = false;

@@ -14,15 +14,12 @@ class BluetoothSetting extends StatelessWidget {
 
     Color color = Colors.white;
     IconData icon = Icons.bluetooth_searching;
-    //print("I: " + homePageStore.currentPageIndex.toString());
-    //print("PageIndex: "+homePageStore.bluetoothPageIndex.toString());
-    //print("bluetoothState: "+homePageStore.bluetoothState.toString());
     if (homePageStore.bluetoothState == BluetoothState.off) {
       icon = Icons.bluetooth_disabled;
       color = Colors.red;
     } else if (homePageStore.bluetoothState == BluetoothState.on) {
       icon = Icons.bluetooth_connected;
-      color = Colors.lightBlueAccent;
+      color = Colors.lightGreenAccent;
     } else if (homePageStore.bluetoothState == BluetoothState.unavailable) {
       icon = Icons.bluetooth_disabled;
       color = Colors.red;
@@ -36,21 +33,32 @@ class BluetoothSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homePageStore = Provider.of<HomePageStore>(context);
+    return BluetoothStatusScreen();
+  }
 
-    return StreamBuilder<BluetoothState>(
-      stream: flutterBlue.state,
-      initialData: homePageStore.bluetoothState,
-      builder: (c, snapshot) {
+  void configureListeners(BuildContext context) {
+    final homePageStore = Provider.of<HomePageStore>(context);
+    flutterBlue.isAvailable.then((b) {
+      if (b) {
         flutterBlue.state.listen((state) {
-          if(state!=homePageStore.bluetoothState)
-            homePageStore.setBluetoothState(state);
-            if(state == BluetoothState.on) {
-              homePageStore.setBluetoothPageDone(true);
-            } else {
-              homePageStore.setBluetoothPageDone(false);
+          if (homePageStore.currentPageIndex > homePageStore.bluetoothPageIndex) {
+            if (homePageStore.bluetoothState == BluetoothState.on && state != BluetoothState.on) {
+              homePageStore.pageController.animateToPage(
+                homePageStore.bluetoothPageIndex,
+                duration: Duration(seconds: 1),
+                curve: Curves.ease,
+              );
             }
+          }
+
+          if (state != homePageStore.bluetoothState) homePageStore.setBluetoothState(state);
+          if (state == BluetoothState.on) {
+            homePageStore.setBluetoothPageDone(true);
+          } else {
+            homePageStore.setBluetoothPageDone(false);
+          }
         }).onError((e) {
+          print('err $e');
           homePageStore.setBluetoothPageDone(false);
           if (e.toString().contains("unavailable")) {
             homePageStore.setBluetoothState(BluetoothState.unavailable);
@@ -60,14 +68,14 @@ class BluetoothSetting extends StatelessWidget {
           }
           //print("Err.State: " + homePageStore.bluetoothState.toString());
         });
-        return BluetoothStatusScreen();
-      },
-    );
+      } else {
+        homePageStore.setBluetoothState(BluetoothState.unavailable);
+      }
+    });
   }
 }
 
 class BluetoothStatusScreen extends StatelessWidget {
-
   Icon getIcon(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
 
