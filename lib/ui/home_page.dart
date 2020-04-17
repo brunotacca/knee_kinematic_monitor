@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:page_view_indicators/linear_progress_page_indicator.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
@@ -10,6 +11,7 @@ import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/04_connect
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
+  final FlutterBlue flutterBlue = FlutterBlue.instance;
   static final introductionPage = IntroductionPage();
   static final bodyPlacementSetting = BodyPlacementSetting();
   static final gpsSetting = GpsSetting();
@@ -41,6 +43,14 @@ class _HomePageState extends State<HomePage> {
     homePageStore.gpsPageIndex = HomePage._settingsItems.indexOf(HomePage.gpsSetting);
     homePageStore.bluetoothPageIndex = HomePage._settingsItems.indexOf(HomePage.bluetoothSetting);
     homePageStore.connectedDevicePageIndex = HomePage._settingsItems.indexOf(HomePage.connectedDeviceSetting);
+
+    widget.flutterBlue.state.listen((state) {
+      if (homePageStore.currentPageIndex > homePageStore.bluetoothPageIndex) {
+        if (homePageStore.bluetoothState == BluetoothState.on && state != BluetoothState.on) {
+          _pageController.animateTo(homePageStore.bluetoothPageIndex.toDouble(), duration: Duration(seconds: 1), curve: null);
+        }
+      }
+    });
 
     _buildPageView() {
       return Expanded(

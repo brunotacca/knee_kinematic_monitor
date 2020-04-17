@@ -140,6 +140,44 @@ mixin _$HomePageStore on _HomePageStore, Store {
     }, _$bluetoothStateAtom, name: '${_$bluetoothStateAtom.name}_set');
   }
 
+  final _$locationServiceEnabledAtom =
+      Atom(name: '_HomePageStore.locationServiceEnabled');
+
+  @override
+  bool get locationServiceEnabled {
+    _$locationServiceEnabledAtom.context
+        .enforceReadPolicy(_$locationServiceEnabledAtom);
+    _$locationServiceEnabledAtom.reportObserved();
+    return super.locationServiceEnabled;
+  }
+
+  @override
+  set locationServiceEnabled(bool value) {
+    _$locationServiceEnabledAtom.context.conditionallyRunInAction(() {
+      super.locationServiceEnabled = value;
+      _$locationServiceEnabledAtom.reportChanged();
+    }, _$locationServiceEnabledAtom,
+        name: '${_$locationServiceEnabledAtom.name}_set');
+  }
+
+  final _$geolocationStatusAtom =
+      Atom(name: '_HomePageStore.geolocationStatus');
+
+  @override
+  GeolocationStatus get geolocationStatus {
+    _$geolocationStatusAtom.context.enforceReadPolicy(_$geolocationStatusAtom);
+    _$geolocationStatusAtom.reportObserved();
+    return super.geolocationStatus;
+  }
+
+  @override
+  set geolocationStatus(GeolocationStatus value) {
+    _$geolocationStatusAtom.context.conditionallyRunInAction(() {
+      super.geolocationStatus = value;
+      _$geolocationStatusAtom.reportChanged();
+    }, _$geolocationStatusAtom, name: '${_$geolocationStatusAtom.name}_set');
+  }
+
   final _$currentPageIndexAtom = Atom(name: '_HomePageStore.currentPageIndex');
 
   @override
@@ -182,6 +220,26 @@ mixin _$HomePageStore on _HomePageStore, Store {
     final _$actionInfo = _$_HomePageStoreActionController.startAction();
     try {
       return super.setBluetoothState(state);
+    } finally {
+      _$_HomePageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setGeolocationStatus(GeolocationStatus status) {
+    final _$actionInfo = _$_HomePageStoreActionController.startAction();
+    try {
+      return super.setGeolocationStatus(status);
+    } finally {
+      _$_HomePageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setLocationServiceEnabled(bool status) {
+    final _$actionInfo = _$_HomePageStoreActionController.startAction();
+    try {
+      return super.setLocationServiceEnabled(status);
     } finally {
       _$_HomePageStoreActionController.endAction(_$actionInfo);
     }
@@ -250,7 +308,7 @@ mixin _$HomePageStore on _HomePageStore, Store {
   @override
   String toString() {
     final string =
-        'introductionPageDone: ${introductionPageDone.toString()},bodyPlacementPageDone: ${bodyPlacementPageDone.toString()},gpsPageDone: ${gpsPageDone.toString()},bluetoothPageDone: ${bluetoothPageDone.toString()},connectedDevicePageDone: ${connectedDevicePageDone.toString()},bluetoothState: ${bluetoothState.toString()},currentPageIndex: ${currentPageIndex.toString()},stepsCompleted: ${stepsCompleted.toString()},progressBarColor: ${progressBarColor.toString()},canGoNextPage: ${canGoNextPage.toString()},pageViewItemCountManaged: ${pageViewItemCountManaged.toString()}';
+        'introductionPageDone: ${introductionPageDone.toString()},bodyPlacementPageDone: ${bodyPlacementPageDone.toString()},gpsPageDone: ${gpsPageDone.toString()},bluetoothPageDone: ${bluetoothPageDone.toString()},connectedDevicePageDone: ${connectedDevicePageDone.toString()},bluetoothState: ${bluetoothState.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},currentPageIndex: ${currentPageIndex.toString()},stepsCompleted: ${stepsCompleted.toString()},progressBarColor: ${progressBarColor.toString()},canGoNextPage: ${canGoNextPage.toString()},pageViewItemCountManaged: ${pageViewItemCountManaged.toString()}';
     return '{$string}';
   }
 }

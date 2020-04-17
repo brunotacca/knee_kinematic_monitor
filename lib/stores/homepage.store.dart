@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mobx/mobx.dart';
 
 part 'homepage.store.g.dart';
@@ -28,6 +29,12 @@ abstract class _HomePageStore with Store {
   BluetoothState bluetoothState = BluetoothState.unknown;
 
   @observable
+  bool locationServiceEnabled;
+
+  @observable
+  GeolocationStatus geolocationStatus = GeolocationStatus.unknown;
+
+  @observable
   int currentPageIndex = 0;
 
   @observable
@@ -36,6 +43,16 @@ abstract class _HomePageStore with Store {
   @action
   void setBluetoothState(BluetoothState state) {
     bluetoothState = state;
+  }
+
+  @action
+  void setGeolocationStatus(GeolocationStatus status) {
+    geolocationStatus = status;
+  }
+
+  @action
+  void setLocationServiceEnabled(bool status) {
+    locationServiceEnabled = status;
   }
 
   @action
