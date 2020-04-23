@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.ppgcc_flutter_iot_ble_data_gatherer">
+    package="com.example.knee_kinematic_monitor">
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -18,7 +18,7 @@
     
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="ppgcc_flutter_iot_ble_data_gatherer"
+        android:label="knee_kinematic_monitor"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

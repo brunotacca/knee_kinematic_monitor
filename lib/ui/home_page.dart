@@ -2,14 +2,16 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:knee_kinematic_monitor/stores/global_settings.dart';
 import 'package:page_view_indicators/linear_progress_page_indicator.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/introduction.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/body_placement.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/gps_location.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/extra_permission.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/bluetooth.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/connected_device.dart';
+import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/ui/start_settings/introduction.dart';
+import 'package:knee_kinematic_monitor/ui/start_settings/body_placement.dart';
+import 'package:knee_kinematic_monitor/ui/start_settings/gps_location.dart';
+import 'package:knee_kinematic_monitor/ui/start_settings/extra_permission.dart';
+import 'package:knee_kinematic_monitor/ui/start_settings/bluetooth.dart';
+import 'package:knee_kinematic_monitor/ui/start_settings/connected_device.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -39,6 +41,8 @@ class _HomePageState extends State<HomePage> {
 
   final _currentPageNotifier = ValueNotifier<int>(0);
 
+  bool _askedPerms = false;
+
   @override
   Widget build(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
@@ -51,8 +55,15 @@ class _HomePageState extends State<HomePage> {
 
     HomePage.bluetoothSetting.configureListeners(context);
     HomePage.gpsSetting.configureListeners(context);
-    HomePage.extraPermissionSetting.checkPermission(context);
+    HomePage.extraPermissionSetting.configureListeners(context);
     if (homePageStore.pageController == null) homePageStore.pageController = _pageController;
+
+    if (!_askedPerms)
+      Future.delayed(Duration(seconds: AppGlobalSettings.countdownDuration), () {
+        homePageStore.allPermissionsNeeded.request().then((v) {
+          _askedPerms = true;
+        });
+      });
 
     _buildPageView() {
       return Expanded(

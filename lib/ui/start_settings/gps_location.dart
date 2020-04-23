@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/streams/geolocator_stream.dart';
+import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/ui/streams/geolocator_stream.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 

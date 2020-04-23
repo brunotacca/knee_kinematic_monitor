@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 
 class ConnectedDeviceSetting extends StatefulWidget {

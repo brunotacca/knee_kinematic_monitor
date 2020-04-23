@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 
 class StoragePermissionStream {
 

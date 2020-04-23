@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 
 class BluetoothSetting extends StatelessWidget {
@@ -111,6 +111,10 @@ class BluetoothStatusScreen extends StatelessWidget {
       if (homePageStore.bluetoothState != null) {
         if (homePageStore.bluetoothState == BluetoothState.off) {
           text = "desligado.\nPor favor ligue.";
+        } else if (homePageStore.bluetoothState == BluetoothState.turningOn) {
+          text = "ligando.";
+        } else if (homePageStore.bluetoothState == BluetoothState.turningOff) {
+          text = "desligando.";
         } else if (homePageStore.bluetoothState == BluetoothState.on) {
           text = "ligado.";
         } else if (homePageStore.bluetoothState == BluetoothState.unavailable) {

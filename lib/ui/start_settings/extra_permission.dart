@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
+
+import '../streams/storage_permission_stream.dart';
 
 class ExtraPermissionSetting extends StatefulWidget {
   final geolocator = Geolocator()..forceAndroidLocationManager = true;
@@ -25,11 +27,21 @@ class ExtraPermissionSetting extends StatefulWidget {
     return Icon(icon, color: color);
   }
 
-  void checkPermission(BuildContext context) {
+  void configureListeners(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
+    final storageStream = StoragePermissionStream(homePageStore).stream;
+    storageStream.listen((active) {
+      if (homePageStore.currentPageIndex > homePageStore.extraPermissionPageIndex) {
+        if (!active) {
+          homePageStore.pageController.animateToPage(
+            homePageStore.extraPermissionPageIndex,
+            duration: Duration(seconds: 1),
+            curve: Curves.ease,
+          );
+        }
+      }
 
-    Permission.storage.isGranted.then((value) {
-      homePageStore.setStoragePermission(value);
+      homePageStore.setExtraPermissionPageDone(homePageStore.storagePermission);
     });
   }
 

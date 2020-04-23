@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/stores/global_settings.dart';
+import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 import 'package:quiver/async.dart';
 
@@ -35,18 +36,21 @@ class _BodyPlacementSettingState extends State<BodyPlacementSetting> {
     }
   }
 
-  static final int _start = 2;
-  int _current = 2;
-
+  static int _start = AppGlobalSettings.countdownDuration;
+  int _current = AppGlobalSettings.countdownDuration;
   CountdownTimer countDownTimer = new CountdownTimer(
     new Duration(seconds: _start),
     new Duration(seconds: 1),
   );
-
   StreamSubscription<CountdownTimer> countdownSubscriber;
 
   void startTimer(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context, listen: false);
+
+    countDownTimer = new CountdownTimer(
+      new Duration(seconds: _start),
+      new Duration(seconds: 1),
+    );
 
     countdownSubscriber = countDownTimer.listen(null);
     countdownSubscriber.onData((duration) {

@@ -1,4 +1,4 @@
-package com.example.ppgcc_flutter_iot_ble_data_gatherer
+package com.example.knee_kinematic_monitor
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

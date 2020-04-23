@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mobx/mobx.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 part 'homepage.store.g.dart';
 
@@ -17,6 +18,12 @@ abstract class _HomePageStore with Store {
   PageController pageController;
   Geolocator geolocator;
   List<Placemark> lastPlacemark;
+  var allPermissionsNeeded = [
+    Permission.location,
+    Permission.locationAlways,
+    Permission.locationWhenInUse,
+    Permission.storage
+  ];
 
   String getPlacemarkFormatted() {
     if (lastPlacemark != null && lastPlacemark.isNotEmpty)
