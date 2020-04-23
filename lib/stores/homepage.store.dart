@@ -12,8 +12,28 @@ abstract class _HomePageStore with Store {
   int bodyPlacementPageIndex = -1;
   int gpsPageIndex = -1;
   int bluetoothPageIndex = -1;
+  int extraPermissionPageIndex = -1;
   int connectedDevicePageIndex = -1;
   PageController pageController;
+  Geolocator geolocator;
+  List<Placemark> lastPlacemark;
+
+  String getPlacemarkFormatted() {
+    if (lastPlacemark != null && lastPlacemark.isNotEmpty)
+      return "" +
+          lastPlacemark[0].thoroughfare +
+          " " +
+          lastPlacemark[0].subThoroughfare +
+          "\n" +
+          lastPlacemark[0].subAdministrativeArea +
+          " - " +
+          lastPlacemark[0].administrativeArea +
+          ", " +
+          lastPlacemark[0].country +
+          ". ";
+    else
+      return "";
+  }
 
   @observable
   bool introductionPageDone = false;
@@ -25,6 +45,8 @@ abstract class _HomePageStore with Store {
   bool bluetoothPageDone = false;
   @observable
   bool connectedDevicePageDone = false;
+  @observable
+  bool extraPermissionPageDone = false;
 
   @observable
   BluetoothState bluetoothState = BluetoothState.unknown;
@@ -36,10 +58,23 @@ abstract class _HomePageStore with Store {
   GeolocationStatus geolocationStatus = GeolocationStatus.unknown;
 
   @observable
+  bool storagePermission;
+
+  @observable
   int currentPageIndex = 0;
 
   @observable
-  int stepsCompleted = 0;
+  Position position;
+
+  @action
+  void setStoragePermission(bool b) {
+    storagePermission = b;
+  }
+
+  @action
+  void setPostion(Position pos) {
+    position = pos;
+  }
 
   @action
   void setBluetoothState(BluetoothState state) {
@@ -64,6 +99,11 @@ abstract class _HomePageStore with Store {
   @action
   setIntroductionPageDone(bool done) {
     introductionPageDone = done;
+  }
+
+  @action
+  setExtraPermissionPageDone(bool done) {
+    extraPermissionPageDone = done;
   }
 
   @action
@@ -92,7 +132,7 @@ abstract class _HomePageStore with Store {
     Color waiting = Colors.grey;
     Color err = Colors.redAccent;
 
-    if(currentPageIndex>0) waiting = Colors.orangeAccent;
+    if (currentPageIndex > 0) waiting = Colors.orangeAccent;
 
     if (currentPageIndex == introductionPageIndex) return introductionPageDone ? ok : waiting;
     if (currentPageIndex == bodyPlacementPageIndex) return bodyPlacementPageDone ? ok : waiting;
@@ -110,28 +150,30 @@ abstract class _HomePageStore with Store {
     if (currentPageIndex == connectedDevicePageIndex) {
       return connectedDevicePageDone ? ok : err;
     }
+    if (currentPageIndex == extraPermissionPageIndex) {
+      return storagePermission ? ok : err;
+    }
 
     return Colors.grey;
   }
 
   @computed
   bool get canGoNextPage {
-    if(currentPageIndex==0 && introductionPageDone) return true;
-    if(currentPageIndex==1 && bodyPlacementPageDone) return true;
-    if(currentPageIndex==2 && gpsPageDone) return true;
-    if(currentPageIndex==3 && bluetoothPageDone) return true;
-    if(currentPageIndex==4 && connectedDevicePageDone) return true;
+    if (currentPageIndex == introductionPageIndex && introductionPageDone) return true;
+    if (currentPageIndex == bodyPlacementPageIndex && bodyPlacementPageDone) return true;
+    if (currentPageIndex == gpsPageIndex && gpsPageDone) return true;
+    if (currentPageIndex == bluetoothPageIndex && bluetoothPageDone) return true;
+    if (currentPageIndex == extraPermissionPageIndex && storagePermission) return true;
+    if (currentPageIndex == connectedDevicePageIndex && connectedDevicePageDone) return true;
     return false;
   }
 
-  @computed 
+  @computed
   int get pageViewItemCountManaged {
-    if(canGoNextPage && currentPageIndex!=connectedDevicePageIndex) {
-      return currentPageIndex+2;
+    if (canGoNextPage && currentPageIndex != connectedDevicePageIndex) {
+      return currentPageIndex + 2;
     } else {
-      return currentPageIndex+1;
+      return currentPageIndex + 1;
     }
   }
-
-
 }

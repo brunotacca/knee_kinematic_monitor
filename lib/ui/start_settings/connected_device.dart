@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 
-class BodyPlacementSetting extends StatelessWidget {
+class ConnectedDeviceSetting extends StatefulWidget {
+
   Icon getBottomIcon(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
-
     Color color = Colors.white;
-    IconData icon = Icons.directions_walk;
-
-    if (homePageStore.bodyPlacementPageDone) {
-      color = Colors.lightGreenAccent;
-      icon = Icons.directions_run;
-    }
+    IconData icon = Icons.device_hub;
 
     return Icon(icon, color: color);
   }
 
+  @override
+  _ConnectedDeviceSettingState createState() => _ConnectedDeviceSettingState();
+}
+
+class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
   @override
   Widget build(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
@@ -26,16 +26,21 @@ class BodyPlacementSetting extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Text(
-              "Body Configuration - How to Place the Device on the Body",
+              "Connect the device",
               style: TextStyle(color: Colors.white),
             ),
-            Spacer(),
-            RaisedButton(
-              child: Text("Cool thanks!"),
-              onPressed: () {
-                homePageStore.setBodyPlacementPageDone(true);
-              },
-            )
+            Expanded(
+              child: Column(),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 10),
+              child: RaisedButton(
+                child: Text("Cool thanks!"),
+                onPressed: () {
+                  homePageStore.setConnectedDevicePageDone(true);
+                },
+              ),
+            ),
           ],
         ),
       ),

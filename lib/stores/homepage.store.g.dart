@@ -123,6 +123,26 @@ mixin _$HomePageStore on _HomePageStore, Store {
         name: '${_$connectedDevicePageDoneAtom.name}_set');
   }
 
+  final _$extraPermissionPageDoneAtom =
+      Atom(name: '_HomePageStore.extraPermissionPageDone');
+
+  @override
+  bool get extraPermissionPageDone {
+    _$extraPermissionPageDoneAtom.context
+        .enforceReadPolicy(_$extraPermissionPageDoneAtom);
+    _$extraPermissionPageDoneAtom.reportObserved();
+    return super.extraPermissionPageDone;
+  }
+
+  @override
+  set extraPermissionPageDone(bool value) {
+    _$extraPermissionPageDoneAtom.context.conditionallyRunInAction(() {
+      super.extraPermissionPageDone = value;
+      _$extraPermissionPageDoneAtom.reportChanged();
+    }, _$extraPermissionPageDoneAtom,
+        name: '${_$extraPermissionPageDoneAtom.name}_set');
+  }
+
   final _$bluetoothStateAtom = Atom(name: '_HomePageStore.bluetoothState');
 
   @override
@@ -178,6 +198,24 @@ mixin _$HomePageStore on _HomePageStore, Store {
     }, _$geolocationStatusAtom, name: '${_$geolocationStatusAtom.name}_set');
   }
 
+  final _$storagePermissionAtom =
+      Atom(name: '_HomePageStore.storagePermission');
+
+  @override
+  bool get storagePermission {
+    _$storagePermissionAtom.context.enforceReadPolicy(_$storagePermissionAtom);
+    _$storagePermissionAtom.reportObserved();
+    return super.storagePermission;
+  }
+
+  @override
+  set storagePermission(bool value) {
+    _$storagePermissionAtom.context.conditionallyRunInAction(() {
+      super.storagePermission = value;
+      _$storagePermissionAtom.reportChanged();
+    }, _$storagePermissionAtom, name: '${_$storagePermissionAtom.name}_set');
+  }
+
   final _$currentPageIndexAtom = Atom(name: '_HomePageStore.currentPageIndex');
 
   @override
@@ -195,25 +233,45 @@ mixin _$HomePageStore on _HomePageStore, Store {
     }, _$currentPageIndexAtom, name: '${_$currentPageIndexAtom.name}_set');
   }
 
-  final _$stepsCompletedAtom = Atom(name: '_HomePageStore.stepsCompleted');
+  final _$positionAtom = Atom(name: '_HomePageStore.position');
 
   @override
-  int get stepsCompleted {
-    _$stepsCompletedAtom.context.enforceReadPolicy(_$stepsCompletedAtom);
-    _$stepsCompletedAtom.reportObserved();
-    return super.stepsCompleted;
+  Position get position {
+    _$positionAtom.context.enforceReadPolicy(_$positionAtom);
+    _$positionAtom.reportObserved();
+    return super.position;
   }
 
   @override
-  set stepsCompleted(int value) {
-    _$stepsCompletedAtom.context.conditionallyRunInAction(() {
-      super.stepsCompleted = value;
-      _$stepsCompletedAtom.reportChanged();
-    }, _$stepsCompletedAtom, name: '${_$stepsCompletedAtom.name}_set');
+  set position(Position value) {
+    _$positionAtom.context.conditionallyRunInAction(() {
+      super.position = value;
+      _$positionAtom.reportChanged();
+    }, _$positionAtom, name: '${_$positionAtom.name}_set');
   }
 
   final _$_HomePageStoreActionController =
       ActionController(name: '_HomePageStore');
+
+  @override
+  void setStoragePermission(bool b) {
+    final _$actionInfo = _$_HomePageStoreActionController.startAction();
+    try {
+      return super.setStoragePermission(b);
+    } finally {
+      _$_HomePageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setPostion(Position pos) {
+    final _$actionInfo = _$_HomePageStoreActionController.startAction();
+    try {
+      return super.setPostion(pos);
+    } finally {
+      _$_HomePageStoreActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void setBluetoothState(BluetoothState state) {
@@ -266,6 +324,16 @@ mixin _$HomePageStore on _HomePageStore, Store {
   }
 
   @override
+  dynamic setExtraPermissionPageDone(bool done) {
+    final _$actionInfo = _$_HomePageStoreActionController.startAction();
+    try {
+      return super.setExtraPermissionPageDone(done);
+    } finally {
+      _$_HomePageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic setBodyPlacementPageDone(bool done) {
     final _$actionInfo = _$_HomePageStoreActionController.startAction();
     try {
@@ -308,7 +376,7 @@ mixin _$HomePageStore on _HomePageStore, Store {
   @override
   String toString() {
     final string =
-        'introductionPageDone: ${introductionPageDone.toString()},bodyPlacementPageDone: ${bodyPlacementPageDone.toString()},gpsPageDone: ${gpsPageDone.toString()},bluetoothPageDone: ${bluetoothPageDone.toString()},connectedDevicePageDone: ${connectedDevicePageDone.toString()},bluetoothState: ${bluetoothState.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},currentPageIndex: ${currentPageIndex.toString()},stepsCompleted: ${stepsCompleted.toString()},progressBarColor: ${progressBarColor.toString()},canGoNextPage: ${canGoNextPage.toString()},pageViewItemCountManaged: ${pageViewItemCountManaged.toString()}';
+        'introductionPageDone: ${introductionPageDone.toString()},bodyPlacementPageDone: ${bodyPlacementPageDone.toString()},gpsPageDone: ${gpsPageDone.toString()},bluetoothPageDone: ${bluetoothPageDone.toString()},connectedDevicePageDone: ${connectedDevicePageDone.toString()},extraPermissionPageDone: ${extraPermissionPageDone.toString()},bluetoothState: ${bluetoothState.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()},currentPageIndex: ${currentPageIndex.toString()},position: ${position.toString()},progressBarColor: ${progressBarColor.toString()},canGoNextPage: ${canGoNextPage.toString()},pageViewItemCountManaged: ${pageViewItemCountManaged.toString()}';
     return '{$string}';
   }
 }

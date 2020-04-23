@@ -10,14 +10,13 @@ import 'package:geolocator/geolocator.dart';
 
 class GpsSetting extends StatefulWidget {
   final geolocator = Geolocator()..forceAndroidLocationManager = true;
-  final locationOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 1);
 
   Icon getBottomIcon(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
     Color color = Colors.white;
     IconData icon = Icons.location_off;
 
-    print(homePageStore.geolocationStatus);
+    //print(homePageStore.geolocationStatus);
 
     if ([GeolocationStatus.denied, GeolocationStatus.disabled].contains(homePageStore.geolocationStatus)) {
       icon = Icons.lock_outline;
@@ -51,7 +50,6 @@ class GpsSetting extends StatefulWidget {
       }
 
       homePageStore.setGpsPageDone(homePageStore.locationServiceEnabled);
-
     });
   }
 
@@ -76,10 +74,13 @@ class _GpsSettingState extends State<GpsSetting> {
 
   @override
   Widget build(BuildContext context) {
+    final homePageStore = Provider.of<HomePageStore>(context);
+    if (homePageStore.geolocator == null) homePageStore.geolocator = widget.geolocator;
+
     return FutureBuilder<bool>(
       future: handleLocationPermsStatus(),
       builder: (BuildContext context, snapshot) {
-        print(snapshot);
+        //print(snapshot);
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         } else {
@@ -87,7 +88,6 @@ class _GpsSettingState extends State<GpsSetting> {
         }
       },
     );
-
   }
 }
 
@@ -97,7 +97,7 @@ class GpsStatusScreen extends StatelessWidget {
     Color color = Colors.white;
     IconData icon = Icons.location_off;
 
-    print(homePageStore.geolocationStatus);
+    //print(homePageStore.geolocationStatus);
 
     if ([GeolocationStatus.unknown, GeolocationStatus.denied, GeolocationStatus.disabled]
         .contains(homePageStore.geolocationStatus)) {
@@ -123,58 +123,136 @@ class GpsStatusScreen extends StatelessWidget {
 
     if ([GeolocationStatus.unknown, GeolocationStatus.denied, GeolocationStatus.disabled]
         .contains(homePageStore.geolocationStatus)) {
-      text = "not available, disabled or denied.";
+      text = "indisponível, desabilitado ou bloqueado.";
     }
     if ([GeolocationStatus.granted].contains(homePageStore.geolocationStatus)) {
       if (!homePageStore.locationServiceEnabled) {
-        text = "is turned off.\nPlease turn it on.";
+        text = "desligado.\nPor favor ligue.";
       } else {
-        text = "on.";
+        text = "ligado.";
       }
     }
 
     return Text(
-      "GPS (Location Service) is " + text,
+      "GPS (Serviço de Localização) está " + text,
       style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
       textAlign: TextAlign.center,
     );
   }
 
+  Widget getGeoInfo(BuildContext context) {
+    final homePageStore = Provider.of<HomePageStore>(context);
+
+    if ([GeolocationStatus.granted].contains(homePageStore.geolocationStatus) && homePageStore.locationServiceEnabled) {
+      if (homePageStore.position != null) {
+        return Padding(
+          padding: EdgeInsets.all(10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                "Lat: ${homePageStore.position.latitude} Long: ${homePageStore.position.latitude}",
+                style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Text(
+                  homePageStore.getPlacemarkFormatted(),
+                  style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        );
+      } else {
+        return Text(
+          "Localização desconhecida",
+          style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+          textAlign: TextAlign.center,
+        );
+      }
+    } else {
+      return Container();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
+    final locationOptions = LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 1);
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () async {
-              var hasOpened = openAppSettings();
-              debugPrint('App Settings opened: ' + hasOpened.toString());
-            },
-          )
-        ],
-      ),
-      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Observer(builder: (_) => getIcon(context)),
-            Observer(builder: (_) => getText(context)),
-            RaisedButton(
-              child: Text("Cool thanks!"),
-              onPressed: () {
-                homePageStore.setGpsPageDone(true);
-              },
-            )
-          ],
+    final StreamSubscription<Position> positionStream =
+        homePageStore.geolocator.getPositionStream(locationOptions).listen((Position position) async {
+      //print(position == null ? 'Unknown' : position.latitude.toString() + ', ' + position.longitude.toString());
+      homePageStore.setPostion(position);
+      homePageStore.lastPlacemark =
+          await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude, localeIdentifier: "pt_BR");
+    });
+    positionStream.onDone(() => positionStream.cancel());
+
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () async {
+                  openAppSettings();
+                  //var hasOpened = openAppSettings();
+                  //debugPrint('App Settings opened: ' + hasOpened.toString());
+                },
+              )
+            ],
+          ),
+          backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Observer(builder: (_) => getIcon(context)),
+                Observer(builder: (_) => getText(context)),
+                Observer(builder: (_) => getGeoInfo(context)),
+              ],
+            ),
+          ),
         ),
-      ),
+        Container(
+          alignment: Alignment.bottomRight,
+          margin: EdgeInsets.only(right: 10),
+          child: ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(15.0)),
+            child: Container(
+              constraints: BoxConstraints.tight(Size(50.0, 40.0)),
+              color: Theme.of(context).primaryColor,
+              child: Row(
+                children: <Widget>[
+                  Spacer(),
+                  IconButton(
+                    icon: Observer(
+                      builder: (_) => Icon(
+                        Icons.arrow_forward_ios,
+                        color: (homePageStore.gpsPageDone ? Colors.lightGreenAccent : Colors.white),
+                      ),
+                    ),
+                    onPressed: () {
+                      homePageStore.pageController.nextPage(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 }

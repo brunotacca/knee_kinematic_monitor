@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 
@@ -109,13 +110,13 @@ class BluetoothStatusScreen extends StatelessWidget {
     if (homePageStore.currentPageIndex == homePageStore.bluetoothPageIndex) {
       if (homePageStore.bluetoothState != null) {
         if (homePageStore.bluetoothState == BluetoothState.off) {
-          text = "off.\nPlease turn it on.";
+          text = "desligado.\nPor favor ligue.";
         } else if (homePageStore.bluetoothState == BluetoothState.on) {
-          text = "on.";
+          text = "ligado.";
         } else if (homePageStore.bluetoothState == BluetoothState.unavailable) {
-          text = "unavaible.\nNot found on your device.";
+          text = "indisponível.\nNão encontrado no dispositivo.";
         } else if (homePageStore.bluetoothState == BluetoothState.unauthorized) {
-          text = "unauthorized.\nPlease give the app permissions.";
+          text = "bloqueado.\nPor favor autorize o uso.";
         } else {
           text = homePageStore.bluetoothState.toString().substring(15);
         }
@@ -123,7 +124,7 @@ class BluetoothStatusScreen extends StatelessWidget {
     }
 
     return Text(
-      "Bluetooth Adapter is " + text,
+      "O Bluetooth está " + text,
       style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
       textAlign: TextAlign.center,
     );
@@ -131,17 +132,66 @@ class BluetoothStatusScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Observer(builder: (_) => getIcon(context)),
-            Observer(builder: (_) => getText(context)),
-          ],
+    final homePageStore = Provider.of<HomePageStore>(context);
+
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () async {
+                  openAppSettings();
+                },
+              )
+            ],
+          ),
+          backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Observer(builder: (_) => getIcon(context)),
+                Observer(builder: (_) => getText(context)),
+              ],
+            ),
+          ),
         ),
-      ),
+        Container(
+          alignment: Alignment.bottomRight,
+          margin: EdgeInsets.only(right: 10),
+          child: ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(15.0)),
+            child: Container(
+              constraints: BoxConstraints.tight(Size(50.0, 40.0)),
+              color: Theme.of(context).primaryColor,
+              child: Row(
+                children: <Widget>[
+                  Spacer(),
+                  IconButton(
+                    icon: Observer(
+                      builder: (_) => Icon(
+                        Icons.arrow_forward_ios,
+                        color: (homePageStore.bluetoothPageDone ? Colors.lightGreenAccent : Colors.white),
+                      ),
+                    ),
+                    onPressed: () {
+                      homePageStore.pageController.nextPage(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 }

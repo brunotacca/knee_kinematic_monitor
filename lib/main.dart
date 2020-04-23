@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/home_page.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(new MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
+    runApp(new MyApp());
+  });
+
+  //runApp(new MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

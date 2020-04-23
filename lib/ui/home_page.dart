@@ -1,13 +1,15 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:page_view_indicators/linear_progress_page_indicator.dart';
 import 'package:ppgcc_flutter_iot_ble_data_gatherer/stores/homepage.store.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/00_introduction.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/01_body_placement.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/02_gps_location.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/03_bluetooth.dart';
-import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/04_connected_device.dart';
+import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/introduction.dart';
+import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/body_placement.dart';
+import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/gps_location.dart';
+import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/extra_permission.dart';
+import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/bluetooth.dart';
+import 'package:ppgcc_flutter_iot_ble_data_gatherer/ui/start_settings/connected_device.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,6 +18,7 @@ class HomePage extends StatefulWidget {
   static final bodyPlacementSetting = BodyPlacementSetting();
   static final gpsSetting = GpsSetting();
   static final bluetoothSetting = BluetoothSetting();
+  static final extraPermissionSetting = ExtraPermissionSetting();
   static final connectedDeviceSetting = ConnectedDeviceSetting();
 
   static final _settingsItems = [
@@ -23,6 +26,7 @@ class HomePage extends StatefulWidget {
     bodyPlacementSetting,
     gpsSetting,
     bluetoothSetting,
+    extraPermissionSetting,
     connectedDeviceSetting
   ];
 
@@ -42,11 +46,13 @@ class _HomePageState extends State<HomePage> {
     homePageStore.bodyPlacementPageIndex = HomePage._settingsItems.indexOf(HomePage.bodyPlacementSetting);
     homePageStore.gpsPageIndex = HomePage._settingsItems.indexOf(HomePage.gpsSetting);
     homePageStore.bluetoothPageIndex = HomePage._settingsItems.indexOf(HomePage.bluetoothSetting);
+    homePageStore.extraPermissionPageIndex = HomePage._settingsItems.indexOf(HomePage.extraPermissionSetting);
     homePageStore.connectedDevicePageIndex = HomePage._settingsItems.indexOf(HomePage.connectedDeviceSetting);
 
     HomePage.bluetoothSetting.configureListeners(context);
     HomePage.gpsSetting.configureListeners(context);
-    homePageStore.pageController = _pageController;
+    HomePage.extraPermissionSetting.checkPermission(context);
+    if (homePageStore.pageController == null) homePageStore.pageController = _pageController;
 
     _buildPageView() {
       return Expanded(
@@ -60,6 +66,7 @@ class _HomePageState extends State<HomePage> {
               },
               onPageChanged: (int index) {
                 homePageStore.setCurrentPageIndex(index);
+                //print("page changed "+homePageStore.currentPageIndex.toString());
                 _currentPageNotifier.value = index;
               },
             ),
@@ -83,14 +90,13 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    Color _getBottomBarIconColor(int iconIndex) {
-      return (_currentPageNotifier.value >= iconIndex ? Colors.lightGreenAccent : Colors.white);
-    }
-
     final topAppBar = AppBar(
       elevation: 0.1,
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-      title: Text("Cinematic Data Gatherer"),
+      title: AutoSizeText(
+        "Monitor de Parametros Cinemáticos",
+        maxLines: 1,
+      ),
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.list),
@@ -138,9 +144,17 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {},
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.device_hub, color: _getBottomBarIconColor(4)),
-              onPressed: () {},
+            Observer(
+              builder: (_) => IconButton(
+                icon: HomePage.extraPermissionSetting.getBottomIcon(context),
+                onPressed: () {},
+              ),
+            ),
+            Observer(
+              builder: (_) => IconButton(
+                icon: HomePage.connectedDeviceSetting.getBottomIcon(context),
+                onPressed: () {},
+              ),
             ),
           ],
         ),
