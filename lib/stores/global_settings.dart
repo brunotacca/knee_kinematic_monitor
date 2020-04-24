@@ -1,3 +1,3 @@
 abstract class AppGlobalSettings {
-  static int countdownDuration = 5;
+  static int countdownDuration = 1;
 }

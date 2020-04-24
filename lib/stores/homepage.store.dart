@@ -18,6 +18,7 @@ abstract class _HomePageStore with Store {
   PageController pageController;
   Geolocator geolocator;
   List<Placemark> lastPlacemark;
+  bool flutterBlueIsScanning = false;
   var allPermissionsNeeded = [
     Permission.location,
     Permission.locationAlways,

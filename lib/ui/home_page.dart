@@ -65,6 +65,23 @@ class _HomePageState extends State<HomePage> {
         });
       });
 
+    // REMOVE -------------------------------------------------------------
+    Future.delayed(Duration(seconds: 2), () {
+      homePageStore.setIntroductionPageDone(true);
+      homePageStore.setBodyPlacementPageDone(true);
+      homePageStore.setGpsPageDone(true);
+      homePageStore.setBluetoothPageDone(true);
+      homePageStore.setExtraPermissionPageDone(true);
+      Future.delayed(Duration(seconds: 1), () {
+        homePageStore.pageController.animateToPage(
+          homePageStore.connectedDevicePageIndex,
+          duration: Duration(seconds: 2),
+          curve: Curves.easeInOut,
+        );
+      });
+    });
+    // --------------------------------------------------------------------
+
     _buildPageView() {
       return Expanded(
         child: Container(
