@@ -60,6 +60,27 @@ abstract class _HomePageStore with Store {
   BluetoothState bluetoothState = BluetoothState.unknown;
 
   @observable
+  BluetoothDevice selectedBluetoothDevice;
+  @action
+  void setSelectedBluetoothDevice(BluetoothDevice device){
+    selectedBluetoothDevice = device;
+  }
+
+  @observable
+  BluetoothDeviceState selectedBluetoothDeviceState;
+  @action
+  void setSelectedBluetoothDeviceState(BluetoothDeviceState state){
+    selectedBluetoothDeviceState = state;
+  }
+
+  @observable
+  List<BluetoothDevice> connectedDevices = [];
+  @action
+  void setConnectedDevices(List<BluetoothDevice> devices) {
+    connectedDevices = devices;
+  }
+
+  @observable
   bool locationServiceEnabled;
 
   @observable
@@ -73,6 +94,7 @@ abstract class _HomePageStore with Store {
 
   @observable
   Position position;
+
 
   @action
   void setStoragePermission(bool b) {

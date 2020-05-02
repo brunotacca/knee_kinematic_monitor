@@ -160,6 +160,63 @@ mixin _$HomePageStore on _HomePageStore, Store {
     }, _$bluetoothStateAtom, name: '${_$bluetoothStateAtom.name}_set');
   }
 
+  final _$selectedBluetoothDeviceAtom =
+      Atom(name: '_HomePageStore.selectedBluetoothDevice');
+
+  @override
+  BluetoothDevice get selectedBluetoothDevice {
+    _$selectedBluetoothDeviceAtom.context
+        .enforceReadPolicy(_$selectedBluetoothDeviceAtom);
+    _$selectedBluetoothDeviceAtom.reportObserved();
+    return super.selectedBluetoothDevice;
+  }
+
+  @override
+  set selectedBluetoothDevice(BluetoothDevice value) {
+    _$selectedBluetoothDeviceAtom.context.conditionallyRunInAction(() {
+      super.selectedBluetoothDevice = value;
+      _$selectedBluetoothDeviceAtom.reportChanged();
+    }, _$selectedBluetoothDeviceAtom,
+        name: '${_$selectedBluetoothDeviceAtom.name}_set');
+  }
+
+  final _$selectedBluetoothDeviceStateAtom =
+      Atom(name: '_HomePageStore.selectedBluetoothDeviceState');
+
+  @override
+  BluetoothDeviceState get selectedBluetoothDeviceState {
+    _$selectedBluetoothDeviceStateAtom.context
+        .enforceReadPolicy(_$selectedBluetoothDeviceStateAtom);
+    _$selectedBluetoothDeviceStateAtom.reportObserved();
+    return super.selectedBluetoothDeviceState;
+  }
+
+  @override
+  set selectedBluetoothDeviceState(BluetoothDeviceState value) {
+    _$selectedBluetoothDeviceStateAtom.context.conditionallyRunInAction(() {
+      super.selectedBluetoothDeviceState = value;
+      _$selectedBluetoothDeviceStateAtom.reportChanged();
+    }, _$selectedBluetoothDeviceStateAtom,
+        name: '${_$selectedBluetoothDeviceStateAtom.name}_set');
+  }
+
+  final _$connectedDevicesAtom = Atom(name: '_HomePageStore.connectedDevices');
+
+  @override
+  List<BluetoothDevice> get connectedDevices {
+    _$connectedDevicesAtom.context.enforceReadPolicy(_$connectedDevicesAtom);
+    _$connectedDevicesAtom.reportObserved();
+    return super.connectedDevices;
+  }
+
+  @override
+  set connectedDevices(List<BluetoothDevice> value) {
+    _$connectedDevicesAtom.context.conditionallyRunInAction(() {
+      super.connectedDevices = value;
+      _$connectedDevicesAtom.reportChanged();
+    }, _$connectedDevicesAtom, name: '${_$connectedDevicesAtom.name}_set');
+  }
+
   final _$locationServiceEnabledAtom =
       Atom(name: '_HomePageStore.locationServiceEnabled');
 
@@ -252,6 +309,36 @@ mixin _$HomePageStore on _HomePageStore, Store {
 
   final _$_HomePageStoreActionController =
       ActionController(name: '_HomePageStore');
+
+  @override
+  void setSelectedBluetoothDevice(BluetoothDevice device) {
+    final _$actionInfo = _$_HomePageStoreActionController.startAction();
+    try {
+      return super.setSelectedBluetoothDevice(device);
+    } finally {
+      _$_HomePageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setSelectedBluetoothDeviceState(BluetoothDeviceState state) {
+    final _$actionInfo = _$_HomePageStoreActionController.startAction();
+    try {
+      return super.setSelectedBluetoothDeviceState(state);
+    } finally {
+      _$_HomePageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setConnectedDevices(List<BluetoothDevice> devices) {
+    final _$actionInfo = _$_HomePageStoreActionController.startAction();
+    try {
+      return super.setConnectedDevices(devices);
+    } finally {
+      _$_HomePageStoreActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void setStoragePermission(bool b) {
@@ -376,7 +463,7 @@ mixin _$HomePageStore on _HomePageStore, Store {
   @override
   String toString() {
     final string =
-        'introductionPageDone: ${introductionPageDone.toString()},bodyPlacementPageDone: ${bodyPlacementPageDone.toString()},gpsPageDone: ${gpsPageDone.toString()},bluetoothPageDone: ${bluetoothPageDone.toString()},connectedDevicePageDone: ${connectedDevicePageDone.toString()},extraPermissionPageDone: ${extraPermissionPageDone.toString()},bluetoothState: ${bluetoothState.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()},currentPageIndex: ${currentPageIndex.toString()},position: ${position.toString()},progressBarColor: ${progressBarColor.toString()},canGoNextPage: ${canGoNextPage.toString()},pageViewItemCountManaged: ${pageViewItemCountManaged.toString()}';
+        'introductionPageDone: ${introductionPageDone.toString()},bodyPlacementPageDone: ${bodyPlacementPageDone.toString()},gpsPageDone: ${gpsPageDone.toString()},bluetoothPageDone: ${bluetoothPageDone.toString()},connectedDevicePageDone: ${connectedDevicePageDone.toString()},extraPermissionPageDone: ${extraPermissionPageDone.toString()},bluetoothState: ${bluetoothState.toString()},selectedBluetoothDevice: ${selectedBluetoothDevice.toString()},selectedBluetoothDeviceState: ${selectedBluetoothDeviceState.toString()},connectedDevices: ${connectedDevices.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()},currentPageIndex: ${currentPageIndex.toString()},position: ${position.toString()},progressBarColor: ${progressBarColor.toString()},canGoNextPage: ${canGoNextPage.toString()},pageViewItemCountManaged: ${pageViewItemCountManaged.toString()}';
     return '{$string}';
   }
 }

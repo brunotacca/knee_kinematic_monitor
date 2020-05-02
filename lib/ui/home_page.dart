@@ -65,21 +65,30 @@ class _HomePageState extends State<HomePage> {
         });
       });
 
-    // REMOVE -------------------------------------------------------------
-    Future.delayed(Duration(seconds: 2), () {
-      homePageStore.setIntroductionPageDone(true);
-      homePageStore.setBodyPlacementPageDone(true);
-      homePageStore.setGpsPageDone(true);
-      homePageStore.setBluetoothPageDone(true);
-      homePageStore.setExtraPermissionPageDone(true);
+    // REMOVE ------------------------------------------------------------- #TODO
+    bool debug = false;
+    if (debug && homePageStore.currentPageIndex == 0)
       Future.delayed(Duration(seconds: 1), () {
-        homePageStore.pageController.animateToPage(
-          homePageStore.connectedDevicePageIndex,
-          duration: Duration(seconds: 2),
-          curve: Curves.easeInOut,
-        );
+        homePageStore.setIntroductionPageDone(true);
+        homePageStore.setBodyPlacementPageDone(true);
+        homePageStore.setGpsPageDone(true);
+        homePageStore.setBluetoothPageDone(true);
+        homePageStore.setExtraPermissionPageDone(true);
+        Future.delayed(Duration(seconds: 2), () {
+          homePageStore.pageController.animateToPage(
+            homePageStore.extraPermissionPageIndex,
+            duration: Duration(seconds: 1),
+            curve: Curves.easeInOut,
+          );
+        });
+        Future.delayed(Duration(seconds: 6), () {
+          homePageStore.pageController.animateToPage(
+            homePageStore.connectedDevicePageIndex,
+            duration: Duration(seconds: 1),
+            curve: Curves.easeInOut,
+          );
+        });
       });
-    });
     // --------------------------------------------------------------------
 
     _buildPageView() {
@@ -125,12 +134,6 @@ class _HomePageState extends State<HomePage> {
         "Monitor de Parametros Cinemáticos",
         maxLines: 1,
       ),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.list),
-          onPressed: () {},
-        )
-      ],
     );
 
     final makeBody = Column(

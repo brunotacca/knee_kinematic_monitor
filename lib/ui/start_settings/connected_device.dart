@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/ui/monitor/monitor_page.dart';
 import 'package:provider/provider.dart';
-
-import 'lesson.dart';
 
 class ConnectedDeviceSetting extends StatefulWidget {
   Icon getBottomIcon(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
     Color color = Colors.white;
     IconData icon = Icons.device_hub;
+
+    if (homePageStore.connectedDevicePageDone)
+      color = Colors.lightGreenAccent;
+    else
+      color = Colors.redAccent;
 
     return Icon(icon, color: color);
   }
@@ -19,11 +24,8 @@ class ConnectedDeviceSetting extends StatefulWidget {
 }
 
 class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
-  List lessons;
-
   @override
   void initState() {
-    lessons = getLessons();
     super.initState();
   }
 
@@ -33,68 +35,12 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
   Widget build(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
 
-    ListTile makeListTile(Lesson lesson) => ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-          leading: Container(
-            padding: EdgeInsets.only(right: 12.0),
-            decoration: new BoxDecoration(border: new Border(right: new BorderSide(width: 1.0, color: Colors.white24))),
-            child: Icon(Icons.autorenew, color: Colors.white),
-          ),
-          title: Text(
-            lesson.title,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
-
-          subtitle: Row(
-            children: <Widget>[
-              Expanded(
-                  flex: 1,
-                  child: Container(
-                    // tag: 'hero',
-                    child: LinearProgressIndicator(
-                        backgroundColor: Color.fromRGBO(209, 224, 224, 0.2),
-                        value: lesson.indicatorValue,
-                        valueColor: AlwaysStoppedAnimation(Colors.green)),
-                  )),
-              Expanded(
-                flex: 4,
-                child: Padding(
-                    padding: EdgeInsets.only(left: 10.0),
-                    child: Text(lesson.level, style: TextStyle(color: Colors.white))),
-              )
-            ],
-          ),
-          trailing: Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0),
-          onTap: () {
-            print('connect');
-          },
-        );
-
-    Card makeCard(Lesson lesson) => Card(
-          elevation: 8.0,
-          margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-          child: Container(
-            decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-            child: makeListTile(lesson),
-          ),
-        );
-
-    final makeBody = Container(
-      // decoration: BoxDecoration(color: Color.fromRGBO(58, 66, 86, 1.0)),
-      child: ListView.builder(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        itemCount: lessons.length,
-        itemBuilder: (BuildContext context, int index) {
-          return makeCard(lessons[index]);
-        },
-      ),
-    );
-
-    //return Container(child: makeBody);
-
     print('build ${homePageStore.flutterBlueIsScanning}');
+
+    FlutterBlue.instance.isScanning.listen((b) {
+      print('Is scanning: $b');
+      homePageStore.flutterBlueIsScanning = b;
+    });
 
     Future.delayed(Duration(milliseconds: 400), () {
       if (!homePageStore.flutterBlueIsScanning) {
@@ -103,46 +49,82 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
       }
     });
 
-    FlutterBlue.instance.isScanning.listen((b) {
-      print('Is scanning: $b');
-      homePageStore.flutterBlueIsScanning = b;
-    });
-
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: RefreshIndicator(
-        onRefresh: () => FlutterBlue.instance.startScan(timeout: Duration(seconds: 4)),
-        child: SingleChildScrollView(
-          child: StreamBuilder<List<ScanResult>>(
-            stream: FlutterBlue.instance.scanResults,
-            initialData: [],
-            builder: (c, snapshot) => Column(
-              children: snapshot.data
-                  .map(
-                    (r) => ScanResultTile(
-                      result: r,
-                      /*onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                        r.device.connect();
-                        return DeviceScreen(device: r.device);
-                      })),*/
-                      onTap: () {
-                        //r.device.connect();
-                        r.device.state.last.then((v) {
-                          if (v != BluetoothDeviceState.connected) {
-                            print('connecting...');
-                            r.device.connect();
-                          } else {
-                            print('disconnecting...');
-                            r.device.disconnect();
-                          }
-                        });
-                      },
+      body: Column(
+        children: <Widget>[
+          Observer(
+            builder: (_) => (!homePageStore.canGoNextPage)
+                ? Container()
+                : SingleChildScrollView(
+                    child: Column(
+                      children: <Widget>[
+                        ListView.builder(
+                          itemCount:
+                              homePageStore.connectedDevices.length > 3 ? 3 : homePageStore.connectedDevices.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(
+                                homePageStore.connectedDevices[index].name,
+                                style: Theme.of(context).primaryTextTheme.subtitle,
+                              ),
+                              trailing: RaisedButton(
+                                color: Colors.lightGreenAccent,
+                                child: Text("Monitorar"),
+                                onPressed: () {
+                                  print('pressed');
+                                  homePageStore.selectedBluetoothDevice = homePageStore.connectedDevices[index];
+                                  homePageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => MonitorPage()));
+                                  /*onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                                    r.device.connect();
+                                    return DeviceScreen(device: r.device);
+                                  })),*/
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: Colors.white,
+                        ),
+                      ],
                     ),
-                  )
-                  .toList(),
+                  ),
+          ),
+          RefreshIndicator(
+            onRefresh: () => FlutterBlue.instance.startScan(timeout: Duration(seconds: 4)),
+            child: SingleChildScrollView(
+              child: StreamBuilder<List<ScanResult>>(
+                stream: FlutterBlue.instance.scanResults,
+                initialData: [],
+                builder: (c, snapshot) => Column(
+                  children: snapshot.data
+                      .map(
+                        (r) => ScanResultTile(
+                          result: r,
+                          onTap: () {
+                            //print("tap $r");
+                            r.device.state.first.then((v) {
+                              //print("v: $v");
+                              if (v == BluetoothDeviceState.disconnected) {
+                                //print('connecting...');
+                                r.device.connect();
+                              } else {
+                                //print('disconnecting...');
+                                r.device.disconnect();
+                              }
+                            });
+                          },
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
       floatingActionButton: StreamBuilder<bool>(
         stream: FlutterBlue.instance.isScanning,
@@ -165,79 +147,21 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
   }
 }
 
-List getLessons() {
-  return [
-    Lesson(
-        title: "Introduction to Driving",
-        level: "Beginner",
-        indicatorValue: 0.33,
-        price: 20,
-        content:
-            "Start by taking a couple of minutes to read the info in this section. Launch your app and click on the Settings menu.  While on the settings page, click the Save button.  You should see a circular progress indicator display in the middle of the page and the user interface elements cannot be clicked due to the modal barrier that is constructed."),
-    Lesson(
-        title: "Observation at Junctions",
-        level: "Beginner",
-        indicatorValue: 0.33,
-        price: 50,
-        content:
-            "Start by taking a couple of minutes to read the info in this section. Launch your app and click on the Settings menu.  While on the settings page, click the Save button.  You should see a circular progress indicator display in the middle of the page and the user interface elements cannot be clicked due to the modal barrier that is constructed."),
-    Lesson(
-        title: "Reverse parallel Parking",
-        level: "Intermidiate",
-        indicatorValue: 0.66,
-        price: 30,
-        content:
-            "Start by taking a couple of minutes to read the info in this section. Launch your app and click on the Settings menu.  While on the settings page, click the Save button.  You should see a circular progress indicator display in the middle of the page and the user interface elements cannot be clicked due to the modal barrier that is constructed."),
-    Lesson(
-        title: "Reversing around the corner",
-        level: "Intermidiate",
-        indicatorValue: 0.66,
-        price: 30,
-        content:
-            "Start by taking a couple of minutes to read the info in this section. Launch your app and click on the Settings menu.  While on the settings page, click the Save button.  You should see a circular progress indicator display in the middle of the page and the user interface elements cannot be clicked due to the modal barrier that is constructed."),
-    Lesson(
-        title: "Incorrect Use of Signal",
-        level: "Advanced",
-        indicatorValue: 1.0,
-        price: 50,
-        content:
-            "Start by taking a couple of minutes to read the info in this section. Launch your app and click on the Settings menu.  While on the settings page, click the Save button.  You should see a circular progress indicator display in the middle of the page and the user interface elements cannot be clicked due to the modal barrier that is constructed."),
-    Lesson(
-        title: "Engine Challenges",
-        level: "Advanced",
-        indicatorValue: 1.0,
-        price: 50,
-        content:
-            "Start by taking a couple of minutes to read the info in this section. Launch your app and click on the Settings menu.  While on the settings page, click the Save button.  You should see a circular progress indicator display in the middle of the page and the user interface elements cannot be clicked due to the modal barrier that is constructed."),
-    Lesson(
-        title: "Self Driving Car",
-        level: "Advanced",
-        indicatorValue: 1.0,
-        price: 50,
-        content:
-            "Start by taking a couple of minutes to read the info in this section. Launch your app and click on the Settings menu.  While on the settings page, click the Save button.  You should see a circular progress indicator display in the middle of the page and the user interface elements cannot be clicked due to the modal barrier that is constructed.  ")
-  ];
-}
-
 class ScanResultTile extends StatelessWidget {
   const ScanResultTile({Key key, this.result, this.onTap}) : super(key: key);
 
   final ScanResult result;
   final VoidCallback onTap;
 
-  Future<Widget> _buildTrailing(BuildContext context) async {
+  Widget _buildTrailing(BuildContext context, BluetoothDeviceState state) {
     if (result.device.name.length > 0) {
-      String text = "";
       Color color = Colors.white;
       Icon icon = Icon(Icons.link_off);
-      BluetoothDeviceState bsState = await result.device.state.first;
-      print("$bsState");
-      if (bsState == BluetoothDeviceState.connected) {
-        text = "CONNECTED";
+      //BluetoothDeviceState bsState = await result.device.state.first;
+      if (state == BluetoothDeviceState.connected) {
         color = Colors.lightGreenAccent;
         icon = Icon(Icons.link);
       } else {
-        text = "CONNECT";
         color = Colors.red;
         icon = Icon(Icons.link_off);
       }
@@ -247,14 +171,12 @@ class ScanResultTile extends StatelessWidget {
         color: color,
         onPressed: (result.advertisementData.connectable) ? onTap : null,
       );
-      /*return RaisedButton(
-        child: Text(text),
-        color: Colors.black,
-        textColor: Colors.white,
-        onPressed: (result.advertisementData.connectable) ? onTap : null,
-      );*/
     } else {
-      return Container();
+      return IconButton(
+        icon: Icon(Icons.not_interested),
+        color: Colors.grey,
+        onPressed: (result.advertisementData.connectable) ? onTap : null,
+      );
     }
   }
 
@@ -276,9 +198,20 @@ class ScanResultTile extends StatelessWidget {
         ],
       );
     } else {
-      return Text(
-        result.device.id.toString(),
-        style: Theme.of(context).primaryTextTheme.subtitle,
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "",
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).primaryTextTheme.title,
+          ),
+          Text(
+            "(" + result.rssi.toString() + ") " + result.device.id.toString(),
+            style: Theme.of(context).primaryTextTheme.subtitle,
+          )
+        ],
       );
     }
   }
@@ -340,15 +273,24 @@ class ScanResultTile extends StatelessWidget {
       child: ExpansionTile(
         backgroundColor: Color.fromRGBO(74, 85, 106, .8),
         title: _buildTitle(context),
-        //leading: Text(result.rssi.toString()),
-        trailing: FutureBuilder<Widget>(
-          future: _buildTrailing(context),
+        trailing: StreamBuilder<BluetoothDeviceState>(
+          stream: result.device.state,
           builder: (BuildContext context, snapshot) {
-            if (snapshot.hasData)
-              return snapshot.data;
-            else
+            if (snapshot.hasData) {
+              final homePageStore = Provider.of<HomePageStore>(context);
+
+              FlutterBlue.instance.connectedDevices.then((d) {
+                homePageStore.connectedDevices = d;
+                if (d.length > 0)
+                  homePageStore.setConnectedDevicePageDone(true);
+                else
+                  homePageStore.setConnectedDevicePageDone(false);
+              });
+
+              return _buildTrailing(context, snapshot.data);
+            } else
               return IconButton(
-                icon: Icon(Icons.link_off),
+                icon: Icon(Icons.not_listed_location),
                 onPressed: () {},
               );
           },
