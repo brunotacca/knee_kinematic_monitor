@@ -71,16 +71,13 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
                               ),
                               trailing: RaisedButton(
                                 color: Colors.lightGreenAccent,
-                                child: Text("Monitorar"),
+                                child: Text("Iniciar"),
                                 onPressed: () {
                                   print('pressed');
                                   homePageStore.selectedBluetoothDevice = homePageStore.connectedDevices[index];
                                   homePageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+                                  homePageStore.setStartSettingsDone(true);
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => MonitorPage()));
-                                  /*onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                                    r.device.connect();
-                                    return DeviceScreen(device: r.device);
-                                  })),*/
                                 },
                               ),
                             );
@@ -283,8 +280,9 @@ class ScanResultTile extends StatelessWidget {
                 homePageStore.connectedDevices = d;
                 if (d.length > 0)
                   homePageStore.setConnectedDevicePageDone(true);
-                else
+                else {
                   homePageStore.setConnectedDevicePageDone(false);
+                }
               });
 
               return _buildTrailing(context, snapshot.data);

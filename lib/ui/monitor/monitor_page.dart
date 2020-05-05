@@ -1,40 +1,43 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:knee_kinematic_monitor/ui/monitor/status_info.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MonitorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DefaultTabController(
-        length: choices.length,
-        child: Scaffold(
+    SharedPreferences.getInstance().then((sp) {
+      var v = sp.getBool("startSettingsDone");
+      if (v != null && v == false) sp.setBool("startSettingsDone", true);
+    });
+
+    return DefaultTabController(
+      length: choices.length,
+      child: Scaffold(
+        backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+        appBar: AppBar(
           backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-          appBar: AppBar(
-            backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
-            title: AutoSizeText(
-              "Monitor de Parametros Cinemáticos",
-              maxLines: 1,
-            ),
-            bottom: TabBar(
-              isScrollable: true,
-              tabs: choices.map((Choice choice) {
-                return Tab(
-                  text: choice.title,
-                  icon: Icon(choice.icon),
-                );
-              }).toList(),
-            ),
+          title: AutoSizeText(
+            "Monitor de Parametros Cinemáticos",
+            maxLines: 1,
           ),
-          body: TabBarView(
-            children: choices.map((Choice choice) {
-              return Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: ChoiceCard(choice: choice),
+          bottom: TabBar(
+            isScrollable: true,
+            tabs: choices.map((Choice choice) {
+              return Tab(
+                text: choice.title,
+                icon: Icon(choice.icon),
               );
             }).toList(),
           ),
-          
+        ),
+        body: TabBarView(
+          children: choices.map((Choice choice) {
+            return Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: ChoiceCard(choice: choice),
+            );
+          }).toList(),
         ),
       ),
     );

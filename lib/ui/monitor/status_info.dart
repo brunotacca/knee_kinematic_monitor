@@ -4,6 +4,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 
+import '../home_page.dart';
+
 class StatusInfo extends StatelessWidget {
   const StatusInfo({Key key}) : super(key: key);
 
@@ -17,29 +19,52 @@ class StatusInfo extends StatelessWidget {
     features[2].status = homePageStore.storagePermission;
     features[3].status = homePageStore.selectedBluetoothDeviceState == BluetoothDeviceState.connected;
 
-    return Padding(
-      padding: EdgeInsets.all(5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: features
-                .map(
-                  (f) => FeatureCard(
-                    feature: f,
-                  ),
-                )
-                .toList(),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: Text(
-              homePageStore.selectedBluetoothDevice.name,
-              style: Theme.of(context).primaryTextTheme.body1,
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.all(5),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: features
+                  .map(
+                    (f) => FeatureCard(
+                      feature: f,
+                    ),
+                  )
+                  .toList(),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Text(
+                homePageStore.selectedBluetoothDevice == null ? "" : homePageStore.selectedBluetoothDevice.name,
+                style: Theme.of(context).primaryTextTheme.body1,
+              ),
+            ),
+            Spacer(),
+            Row(
+              children: <Widget>[
+                FlatButton.icon(
+                  onPressed: () {
+                    if (Navigator.canPop(context)) {
+                      print("popping");
+                      Navigator.pop(context);
+                    } else {
+                      print("pushing");
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+                    }
+                  },
+                  icon: Icon(Icons.settings, color: Colors.white),
+                  label: Text(
+                    "Configurações",
+                    style: Theme.of(context).primaryTextTheme.subtitle,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -110,7 +135,7 @@ class FeatureCard extends StatelessWidget {
         ),
         trailing: Icon(
           feature.icon,
-          color: feature.status ? Colors.lightGreenAccent : Colors.redAccent,
+          color: feature.status == null ? Colors.white : feature.status ? Colors.lightGreenAccent : Colors.redAccent,
         ),
       ),
     );

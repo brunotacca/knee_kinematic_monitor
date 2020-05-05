@@ -13,6 +13,7 @@ import 'package:knee_kinematic_monitor/ui/start_settings/bluetooth.dart';
 import 'package:knee_kinematic_monitor/ui/start_settings/connected_device.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   final FlutterBlue flutterBlue = FlutterBlue.instance;

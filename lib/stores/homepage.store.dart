@@ -44,6 +44,14 @@ abstract class _HomePageStore with Store {
   }
 
   @observable
+  bool startSettingsDone;
+
+  @action
+  void setStartSettingsDone(bool done) {
+    startSettingsDone = done;
+  }
+
+  @observable
   bool introductionPageDone = false;
   @observable
   bool bodyPlacementPageDone = false;
