@@ -6,6 +6,7 @@ import 'package:knee_kinematic_monitor/stores/global_settings.dart';
 import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 import 'package:quiver/async.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BodyPlacementSetting extends StatefulWidget {
   Icon getBottomIcon(BuildContext context) {
@@ -70,11 +71,18 @@ class _BodyPlacementSettingState extends State<BodyPlacementSetting> {
   Widget build(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
 
-    Future.delayed(Duration(milliseconds: 500), () {
-      if (countdownSubscriber == null &&
-          !homePageStore.bodyPlacementPageDone &&
-          homePageStore.currentPageIndex == homePageStore.bodyPlacementPageIndex) {
-        startTimer(context);
+    SharedPreferences.getInstance().then((sp) {
+      var v = sp.getBool("startSettingsDone");
+      if (v) {
+        homePageStore.setBodyPlacementPageDone(true);
+      } else {
+        Future.delayed(Duration(milliseconds: 500), () {
+          if (countdownSubscriber == null &&
+              !homePageStore.introductionPageDone &&
+              homePageStore.currentPageIndex == homePageStore.introductionPageIndex) {
+            startTimer(context);
+          }
+        });
       }
     });
 

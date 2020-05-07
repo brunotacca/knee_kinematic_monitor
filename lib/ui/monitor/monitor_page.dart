@@ -1,15 +1,90 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue/flutter_blue.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:knee_kinematic_monitor/stores/global_settings.dart';
+import 'package:knee_kinematic_monitor/stores/monitorpage.store.dart';
 import 'package:knee_kinematic_monitor/ui/monitor/status_info.dart';
+import 'package:knee_kinematic_monitor/ui/streams/geolocator_stream.dart';
+import 'package:knee_kinematic_monitor/ui/streams/storage_permission_stream.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class MonitorPage extends StatelessWidget {
+class MonitorPage extends StatefulWidget {
+  final FlutterBlue flutterBlue = FlutterBlue.instance;
+  final geolocator = Geolocator()..forceAndroidLocationManager = true;
+
+  @override
+  _MonitorPageState createState() => _MonitorPageState();
+}
+
+class _MonitorPageState extends State<MonitorPage> {
+  void configureListeners(BuildContext context) {
+    final monitorPageStore = Provider.of<MonitorPageStore>(context);
+
+    // ------------------- Bluetooth
+    widget.flutterBlue.isAvailable.then((b) {
+      if (b) {
+        widget.flutterBlue.state.listen((state) {
+          if (state != monitorPageStore.bluetoothState) {
+            monitorPageStore.setBluetoothState(state);
+
+            // ------------------ Connected Devices
+            if (state == BluetoothState.on) {
+
+              widget.flutterBlue.connectedDevices.then((cd) {
+                monitorPageStore.connectedDevices = cd;
+              });
+
+              widget.flutterBlue.startScan(timeout: Duration(seconds: 10)).then((sr) {
+                for (final r in sr) {
+                  if (r.device.name == AppGlobalSettings.deviceName) {
+                    r.device.disconnect().then((v) {
+                      r.device.connect().then((v) {
+                        monitorPageStore.selectedBluetoothDevice = r.device;
+                        monitorPageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+                      });
+                    });
+                    break;
+                  }
+                }
+              });
+            } else {
+              monitorPageStore.setConnectedDevices([]);
+              monitorPageStore.selectedBluetoothDevice = null;
+              monitorPageStore.selectedBluetoothDeviceState = null;
+            }
+          }
+        });
+      } else {
+        monitorPageStore.setBluetoothState(BluetoothState.unavailable);
+      }
+    });
+
+    // ------------------- Storage
+    final storageStream = StoragePermissionStream(monitorPageStore: monitorPageStore).stream;
+    storageStream.listen((b) {});
+
+    // ------------------- GPS
+    final geoStream = GeolocatorStatusStream(monitorPageStore: monitorPageStore, geolocator: widget.geolocator).stream;
+    geoStream.listen((b) {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    print(">>>>>>>>> build");
+    final monitorPageStore = Provider.of<MonitorPageStore>(context);
+
     SharedPreferences.getInstance().then((sp) {
       var v = sp.getBool("startSettingsDone");
       if (v != null && v == false) sp.setBool("startSettingsDone", true);
+      var d = sp.getString("lastDeviceConnectedId");
+      if (d != null && d.isNotEmpty) {
+        monitorPageStore.lastDeviceConnectedId = d;
+      }
     });
+
+    configureListeners(context);
 
     return DefaultTabController(
       length: choices.length,

@@ -29,7 +29,7 @@ class ExtraPermissionSetting extends StatefulWidget {
 
   void configureListeners(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
-    final storageStream = StoragePermissionStream(homePageStore).stream;
+    final storageStream = StoragePermissionStream(homePageStore: homePageStore).stream;
     storageStream.listen((active) {
       if (homePageStore.currentPageIndex > homePageStore.extraPermissionPageIndex) {
         if (!active) {

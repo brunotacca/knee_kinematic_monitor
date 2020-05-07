@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:knee_kinematic_monitor/stores/global_settings.dart';
 import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/stores/monitorpage.store.dart';
 import 'package:knee_kinematic_monitor/ui/monitor/monitor_page.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ConnectedDeviceSetting extends StatefulWidget {
   Icon getBottomIcon(BuildContext context) {
@@ -34,6 +37,7 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
   @override
   Widget build(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
+    final monitorPageStore = Provider.of<MonitorPageStore>(context);
 
     print('build ${homePageStore.flutterBlueIsScanning}');
 
@@ -76,8 +80,16 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
                                   print('pressed');
                                   homePageStore.selectedBluetoothDevice = homePageStore.connectedDevices[index];
                                   homePageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+                                  monitorPageStore.selectedBluetoothDevice = homePageStore.selectedBluetoothDevice;
+                                  monitorPageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+                                  monitorPageStore.lastDeviceConnectedId =
+                                      homePageStore.selectedBluetoothDevice.id.toString();
+                                  SharedPreferences.getInstance().then((sp) {
+                                    sp.setString("lastDeviceConnectedId", monitorPageStore.lastDeviceConnectedId);
+                                  });
                                   homePageStore.setStartSettingsDone(true);
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => MonitorPage()));
+                                  Navigator.pushReplacement(
+                                      context, MaterialPageRoute(builder: (context) => MonitorPage()));
                                 },
                               ),
                             );
@@ -99,22 +111,16 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
                 builder: (c, snapshot) => Column(
                   children: snapshot.data
                       .map(
-                        (r) => ScanResultTile(
-                          result: r,
-                          onTap: () {
-                            //print("tap $r");
-                            r.device.state.first.then((v) {
-                              //print("v: $v");
-                              if (v == BluetoothDeviceState.disconnected) {
-                                //print('connecting...');
-                                r.device.connect();
-                              } else {
-                                //print('disconnecting...');
-                                r.device.disconnect();
-                              }
-                            });
-                          },
-                        ),
+                        (r) => (r.device.name == AppGlobalSettings.deviceName)
+                            ? ScanResultTile(
+                                result: r,
+                                onTap: () {
+                                  r.device.disconnect().then((v) {
+                                    r.device.connect();
+                                  });
+                                },
+                              )
+                            : Container(),
                       )
                       .toList(),
                 ),
@@ -277,7 +283,7 @@ class ScanResultTile extends StatelessWidget {
               final homePageStore = Provider.of<HomePageStore>(context);
 
               FlutterBlue.instance.connectedDevices.then((d) {
-                homePageStore.connectedDevices = d;
+                homePageStore.setConnectedDevices(d);
                 if (d.length > 0)
                   homePageStore.setConnectedDevicePageDone(true);
                 else {

@@ -26,11 +26,11 @@ class _LoadingPageState extends State<LoadingPage> {
   void fetchSharedPreferences(BuildContext context) async {
     final homePageStore = Provider.of<HomePageStore>(context);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    var b = prefs.getBool('startSettingsDone');
 
-    homePageStore.setStartSettingsDone(b != null ? b : false);
+    var startSettingsDone = prefs.getBool('startSettingsDone');
+    homePageStore.setStartSettingsDone(startSettingsDone != null ? startSettingsDone : false);
 
-    if (b) {
+    if (startSettingsDone) {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MonitorPage()));
     } else {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));

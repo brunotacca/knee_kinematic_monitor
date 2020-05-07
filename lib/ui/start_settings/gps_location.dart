@@ -37,7 +37,7 @@ class GpsSetting extends StatefulWidget {
 
   void configureListeners(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
-    final geoStream = GeolocatorStatusStream(homePageStore, geolocator).stream;
+    final geoStream = GeolocatorStatusStream(homePageStore: homePageStore, geolocator: geolocator).stream;
     geoStream.listen((active) {
       if (homePageStore.currentPageIndex > homePageStore.gpsPageIndex) {
         if (!active) {

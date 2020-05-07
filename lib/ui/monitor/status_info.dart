@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
+import 'package:knee_kinematic_monitor/stores/monitorpage.store.dart';
 import 'package:provider/provider.dart';
 
 import '../home_page.dart';
@@ -11,13 +12,9 @@ class StatusInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homePageStore = Provider.of<HomePageStore>(context);
+    print(">>>>>>>>> build");
 
-    features[0].status =
-        (homePageStore.geolocationStatus == GeolocationStatus.granted && homePageStore.locationServiceEnabled);
-    features[1].status = homePageStore.bluetoothState == BluetoothState.on;
-    features[2].status = homePageStore.storagePermission;
-    features[3].status = homePageStore.selectedBluetoothDeviceState == BluetoothDeviceState.connected;
+    final monitorPageStore = Provider.of<MonitorPageStore>(context);
 
     return Expanded(
       child: Padding(
@@ -37,9 +34,11 @@ class StatusInfo extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 5),
-              child: Text(
-                homePageStore.selectedBluetoothDevice == null ? "" : homePageStore.selectedBluetoothDevice.name,
-                style: Theme.of(context).primaryTextTheme.body1,
+              child: Observer(
+                builder: (_) => Text(
+                  monitorPageStore.selectedBluetoothDevice == null ? "" : monitorPageStore.selectedBluetoothDevice.name,
+                  style: Theme.of(context).primaryTextTheme.body1,
+                ),
               ),
             ),
             Spacer(),
@@ -133,11 +132,25 @@ class FeatureCard extends StatelessWidget {
             )
           ],
         ),
-        trailing: Icon(
-          feature.icon,
-          color: feature.status == null ? Colors.white : feature.status ? Colors.lightGreenAccent : Colors.redAccent,
+        trailing: Observer(
+          builder: (_) => Icon(
+            feature.icon,
+            color: _getColor(context),
+          ),
         ),
       ),
     );
+  }
+
+  _getColor(BuildContext context) {
+    final monitorPageStore = Provider.of<MonitorPageStore>(context);
+
+    features[0].status =
+        (monitorPageStore.geolocationStatus == GeolocationStatus.granted && monitorPageStore.locationServiceEnabled);
+    features[1].status = monitorPageStore.bluetoothState == BluetoothState.on;
+    features[2].status = monitorPageStore.storagePermission;
+    features[3].status = monitorPageStore.selectedBluetoothDeviceState == BluetoothDeviceState.connected;
+
+    return feature.status == null ? Colors.white : feature.status ? Colors.lightGreenAccent : Colors.redAccent;
   }
 }

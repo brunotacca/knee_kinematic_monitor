@@ -6,6 +6,7 @@ import 'package:knee_kinematic_monitor/stores/global_settings.dart';
 import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 import 'package:provider/provider.dart';
 import 'package:quiver/async.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IntroductionPage extends StatefulWidget {
   Icon getBottomIcon(BuildContext context) {
@@ -37,7 +38,7 @@ class _IntroductionPageState extends State<IntroductionPage> {
   }
 
   static int _start = AppGlobalSettings.countdownDuration;
-  int _current  = AppGlobalSettings.countdownDuration;
+  int _current = AppGlobalSettings.countdownDuration;
   CountdownTimer countDownTimer = new CountdownTimer(
     new Duration(seconds: _start),
     new Duration(seconds: 1),
@@ -65,11 +66,22 @@ class _IntroductionPageState extends State<IntroductionPage> {
   Widget build(BuildContext context) {
     final homePageStore = Provider.of<HomePageStore>(context);
 
-    Future.delayed(Duration(milliseconds: 500), () {
-      if (countdownSubscriber == null &&
-          !homePageStore.introductionPageDone &&
-          homePageStore.currentPageIndex == homePageStore.introductionPageIndex) {
-        startTimer(context);
+    SharedPreferences.getInstance().then((sp) {
+      var v = sp.getBool("startSettingsDone");
+      if (v) {
+        homePageStore.setIntroductionPageDone(true);
+        setState(() {
+          _current = 0;
+        });
+        homePageStore.setBodyPlacementPageDone(true);
+      } else {
+        Future.delayed(Duration(milliseconds: 500), () {
+          if (countdownSubscriber == null &&
+              !homePageStore.introductionPageDone &&
+              homePageStore.currentPageIndex == homePageStore.introductionPageIndex) {
+            startTimer(context);
+          }
+        });
       }
     });
 
