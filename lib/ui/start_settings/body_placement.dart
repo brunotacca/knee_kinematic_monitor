@@ -137,7 +137,7 @@ An dubium est, quin virtus ita maximam partem optineat in rebus humanis, ut reli
                       ? Container()
                       : Text(
                           ((_current > 0 && !homePageStore.bodyPlacementPageDone) ? "$_current" : ""),
-                          style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+                          style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
                         )),
                   IconButton(
                     icon: Observer(

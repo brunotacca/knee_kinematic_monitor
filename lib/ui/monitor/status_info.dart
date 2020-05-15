@@ -37,7 +37,7 @@ class StatusInfo extends StatelessWidget {
               child: Observer(
                 builder: (_) => Text(
                   monitorPageStore.selectedBluetoothDevice == null ? "" : monitorPageStore.selectedBluetoothDevice.name,
-                  style: Theme.of(context).primaryTextTheme.body1,
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ),
             ),
@@ -57,7 +57,7 @@ class StatusInfo extends StatelessWidget {
                   icon: Icon(Icons.settings, color: Colors.white),
                   label: Text(
                     "Configurações",
-                    style: Theme.of(context).primaryTextTheme.subtitle,
+                    style: Theme.of(context).primaryTextTheme.subtitle2,
                   ),
                 ),
               ],
@@ -124,11 +124,11 @@ class FeatureCard extends StatelessWidget {
             Text(
               feature.title,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).primaryTextTheme.title,
+              style: Theme.of(context).primaryTextTheme.headline6,
             ),
             Text(
               feature.about,
-              style: Theme.of(context).primaryTextTheme.body1,
+              style: Theme.of(context).primaryTextTheme.bodyText2,
             )
           ],
         ),

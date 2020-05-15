@@ -71,7 +71,7 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
                             return ListTile(
                               title: Text(
                                 homePageStore.connectedDevices[index].name,
-                                style: Theme.of(context).primaryTextTheme.subtitle,
+                                style: Theme.of(context).primaryTextTheme.subtitle2,
                               ),
                               trailing: RaisedButton(
                                 color: Colors.lightGreenAccent,
@@ -192,11 +192,11 @@ class ScanResultTile extends StatelessWidget {
           Text(
             result.device.name,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).primaryTextTheme.title,
+            style: Theme.of(context).primaryTextTheme.headline6,
           ),
           Text(
             "(" + result.rssi.toString() + ") " + result.device.id.toString(),
-            style: Theme.of(context).primaryTextTheme.subtitle,
+            style: Theme.of(context).primaryTextTheme.subtitle2,
           )
         ],
       );
@@ -208,11 +208,11 @@ class ScanResultTile extends StatelessWidget {
           Text(
             "",
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).primaryTextTheme.title,
+            style: Theme.of(context).primaryTextTheme.headline6,
           ),
           Text(
             "(" + result.rssi.toString() + ") " + result.device.id.toString(),
-            style: Theme.of(context).primaryTextTheme.subtitle,
+            style: Theme.of(context).primaryTextTheme.subtitle2,
           )
         ],
       );

@@ -62,7 +62,7 @@ class _LoadingPageState extends State<LoadingPage> {
                   ),
                   AutoSizeText(
                     "Monitor de Parâmetros Cinemáticos",
-                    style: Theme.of(context).primaryTextTheme.title,
+                    style: Theme.of(context).primaryTextTheme.headline6,
                   ),
                 ],
               )),
@@ -84,7 +84,7 @@ class _LoadingPageState extends State<LoadingPage> {
                   ),
                   AutoSizeText(
                     "Carregando configurações...",
-                    style: Theme.of(context).primaryTextTheme.subtitle,
+                    style: Theme.of(context).primaryTextTheme.subtitle2,
                   ),
                 ],
               ),

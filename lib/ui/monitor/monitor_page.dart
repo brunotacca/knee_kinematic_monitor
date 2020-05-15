@@ -160,7 +160,7 @@ class ChoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle textStyle = Theme.of(context).primaryTextTheme.subtitle;
+    final TextStyle textStyle = Theme.of(context).primaryTextTheme.subtitle2;
     return Card(
       color: Color.fromRGBO(58, 66, 86, 1.0),
       child: Column(

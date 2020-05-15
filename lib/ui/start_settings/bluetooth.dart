@@ -129,7 +129,7 @@ class BluetoothStatusScreen extends StatelessWidget {
 
     return Text(
       "O Bluetooth está " + text,
-      style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+      style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
       textAlign: TextAlign.center,
     );
   }

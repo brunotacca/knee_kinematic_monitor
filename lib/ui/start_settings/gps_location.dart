@@ -135,7 +135,7 @@ class GpsStatusScreen extends StatelessWidget {
 
     return Text(
       "GPS (Serviço de Localização) está " + text,
-      style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+      style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
       textAlign: TextAlign.center,
     );
   }
@@ -152,14 +152,14 @@ class GpsStatusScreen extends StatelessWidget {
             children: <Widget>[
               Text(
                 "Lat: ${homePageStore.position.latitude} Long: ${homePageStore.position.latitude}",
-                style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+                style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
                 textAlign: TextAlign.center,
               ),
               Padding(
                 padding: EdgeInsets.only(top: 10),
                 child: Text(
                   homePageStore.getPlacemarkFormatted(),
-                  style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+                  style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -169,7 +169,7 @@ class GpsStatusScreen extends StatelessWidget {
       } else {
         return Text(
           "Localização desconhecida",
-          style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+          style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
           textAlign: TextAlign.center,
         );
       }

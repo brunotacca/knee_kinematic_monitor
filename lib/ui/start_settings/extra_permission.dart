@@ -110,7 +110,7 @@ class ExtraPermissionScreen extends StatelessWidget {
 
     return Text(
       "As permissões extras estão " + text,
-      style: Theme.of(context).primaryTextTheme.subhead.copyWith(color: Colors.white),
+      style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
       textAlign: TextAlign.center,
     );
   }
