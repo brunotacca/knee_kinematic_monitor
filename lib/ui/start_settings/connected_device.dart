@@ -55,79 +55,108 @@ class _ConnectedDeviceSettingState extends State<ConnectedDeviceSetting> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Column(
-        children: <Widget>[
-          Observer(
-            builder: (_) => (!homePageStore.canGoNextPage)
-                ? Container()
-                : SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        ListView.builder(
-                          itemCount:
-                              homePageStore.connectedDevices.length > 3 ? 3 : homePageStore.connectedDevices.length,
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              title: Text(
-                                homePageStore.connectedDevices[index].name,
-                                style: Theme.of(context).primaryTextTheme.subtitle2,
-                              ),
-                              trailing: RaisedButton(
-                                color: Colors.lightGreenAccent,
-                                child: Text("Iniciar"),
-                                onPressed: () {
-                                  print('pressed');
-                                  homePageStore.selectedBluetoothDevice = homePageStore.connectedDevices[index];
-                                  homePageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
-                                  monitorPageStore.selectedBluetoothDevice = homePageStore.selectedBluetoothDevice;
-                                  monitorPageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
-                                  monitorPageStore.lastDeviceConnectedId =
-                                      homePageStore.selectedBluetoothDevice.id.toString();
-                                  SharedPreferences.getInstance().then((sp) {
-                                    sp.setString("lastDeviceConnectedId", monitorPageStore.lastDeviceConnectedId);
-                                  });
-                                  homePageStore.setStartSettingsDone(true);
-                                  Navigator.pushReplacement(
-                                      context, MaterialPageRoute(builder: (context) => MonitorPage()));
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                        Divider(
-                          color: Colors.white,
-                        ),
-                      ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Observer(
+              builder: (_) => (!homePageStore.canGoNextPage)
+                  ? Container()
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          ListView.builder(
+                            itemCount:
+                                homePageStore.connectedDevices.length > 3 ? 3 : homePageStore.connectedDevices.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(
+                                  homePageStore.connectedDevices[index].name,
+                                  style: Theme.of(context).primaryTextTheme.subtitle2,
+                                ),
+                                subtitle: FutureBuilder<List<BluetoothService>>(
+                                  future: homePageStore.connectedDevices[index].discoverServices(),
+                                  builder: (BuildContext context, snapshot) {
+                                    String text = "hasnt";
+                                    if (snapshot.hasData) {
+                                      snapshot.data.forEach((s) {
+                                        print("Service: " + s.uuid.toString());
+                                        print("--------------------");
+                                        s.characteristics.forEach((c) {
+                                          print("> Characteristic: " + c.uuid.toString());
+                                          print("> > Properties: "+c.properties.toString());
+                                          print("> --------------------");
+                                          c.descriptors.forEach((d) {
+                                            print("> > Descriptor: "+d.toString());
+                                          });
+                                          print("> --------------------");
+                                        });
+                                        print("--------------------");
+                                      });
+                                      text = "YES " + snapshot.data.length.toString();
+                                    }
+                                    return Text(
+                                      text,
+                                      style: Theme.of(context).primaryTextTheme.subtitle2,
+                                    );
+                                  },
+                                ),
+                                trailing: RaisedButton(
+                                  color: Colors.lightGreenAccent,
+                                  child: Text("Iniciar"),
+                                  onPressed: () {
+                                    print('pressed');
+                                    homePageStore.selectedBluetoothDevice = homePageStore.connectedDevices[index];
+                                    homePageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+                                    monitorPageStore.selectedBluetoothDevice = homePageStore.selectedBluetoothDevice;
+                                    monitorPageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+                                    monitorPageStore.lastDeviceConnectedId =
+                                        homePageStore.selectedBluetoothDevice.id.toString();
+                                    SharedPreferences.getInstance().then((sp) {
+                                      sp.setString("lastDeviceConnectedId", monitorPageStore.lastDeviceConnectedId);
+                                    });
+                                    homePageStore.setStartSettingsDone(true);
+                                    Navigator.pushReplacement(
+                                        context, MaterialPageRoute(builder: (context) => MonitorPage()));
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                          Divider(
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
                     ),
+            ),
+            RefreshIndicator(
+              onRefresh: () => FlutterBlue.instance.startScan(timeout: Duration(seconds: 4)),
+              child: SingleChildScrollView(
+                child: StreamBuilder<List<ScanResult>>(
+                  stream: FlutterBlue.instance.scanResults,
+                  initialData: [],
+                  builder: (c, snapshot) => Column(
+                    children: snapshot.data
+                        .map(
+                          (r) => (r.device.name == AppGlobalSettings.deviceName)
+                              ? ScanResultTile(
+                                  result: r,
+                                  onTap: () {
+                                    r.device.disconnect().then((v) {
+                                      r.device.connect();
+                                    });
+                                  },
+                                )
+                              : Container(),
+                        )
+                        .toList(),
                   ),
-          ),
-          RefreshIndicator(
-            onRefresh: () => FlutterBlue.instance.startScan(timeout: Duration(seconds: 4)),
-            child: SingleChildScrollView(
-              child: StreamBuilder<List<ScanResult>>(
-                stream: FlutterBlue.instance.scanResults,
-                initialData: [],
-                builder: (c, snapshot) => Column(
-                  children: snapshot.data
-                      .map(
-                        (r) => (r.device.name == AppGlobalSettings.deviceName)
-                            ? ScanResultTile(
-                                result: r,
-                                onTap: () {
-                                  r.device.disconnect().then((v) {
-                                    r.device.connect();
-                                  });
-                                },
-                              )
-                            : Container(),
-                      )
-                      .toList(),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: StreamBuilder<bool>(
         stream: FlutterBlue.instance.isScanning,

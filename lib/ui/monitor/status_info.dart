@@ -35,9 +35,36 @@ class StatusInfo extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 5),
               child: Observer(
-                builder: (_) => Text(
-                  monitorPageStore.selectedBluetoothDevice == null ? "" : monitorPageStore.selectedBluetoothDevice.name,
-                  style: Theme.of(context).primaryTextTheme.bodyText2,
+                builder: (_) => Container(
+                  child: monitorPageStore.bluetoothState != BluetoothState.on
+                      ? Text(
+                          "Bluetooth não disponível",
+                          style: Theme.of(context).primaryTextTheme.bodyText2,
+                        )
+                      : (monitorPageStore.selectedBluetoothDevice == null
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                Text(
+                                  "Procurando dispositivo padrão...",
+                                  style: Theme.of(context).primaryTextTheme.bodyText2,
+                                ),
+                                VerticalDivider(
+                                  width: 10,
+                                ),
+                                SizedBox(
+                                  height: 15.0,
+                                  width: 15.0,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.0,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              monitorPageStore.selectedBluetoothDevice.name,
+                              style: Theme.of(context).primaryTextTheme.bodyText2,
+                            )),
                 ),
               ),
             ),

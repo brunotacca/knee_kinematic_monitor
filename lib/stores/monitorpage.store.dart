@@ -62,4 +62,25 @@ abstract class _MonitorPageStore with Store {
   void setLocationServiceEnabled(bool status) {
     locationServiceEnabled = status;
   }
+
+  @observable
+  BluetoothCharacteristic bcReceiver;
+  @observable
+  BluetoothCharacteristic bcTransmitter;
+  @observable
+  Stream<List<int>> transmitterDataStream;
+
+  @action
+  void setBcReceiver(BluetoothCharacteristic rx) {
+    bcReceiver = rx;
+  }
+  @action
+  void setBcTransmitter(BluetoothCharacteristic tx) {
+    bcTransmitter = tx;
+  }
+  @action
+  void setTransmitterDataStream(Stream<List<int>> str) {
+    transmitterDataStream = str;
+  }
+
 }

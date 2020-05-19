@@ -66,6 +66,24 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
         name: '${_$selectedBluetoothDeviceStateAtom.name}_set');
   }
 
+  final _$connectedDevicesAtom =
+      Atom(name: '_MonitorPageStore.connectedDevices');
+
+  @override
+  List<BluetoothDevice> get connectedDevices {
+    _$connectedDevicesAtom.context.enforceReadPolicy(_$connectedDevicesAtom);
+    _$connectedDevicesAtom.reportObserved();
+    return super.connectedDevices;
+  }
+
+  @override
+  set connectedDevices(List<BluetoothDevice> value) {
+    _$connectedDevicesAtom.context.conditionallyRunInAction(() {
+      super.connectedDevices = value;
+      _$connectedDevicesAtom.reportChanged();
+    }, _$connectedDevicesAtom, name: '${_$connectedDevicesAtom.name}_set');
+  }
+
   final _$locationServiceEnabledAtom =
       Atom(name: '_MonitorPageStore.locationServiceEnabled');
 
@@ -122,6 +140,60 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
     }, _$storagePermissionAtom, name: '${_$storagePermissionAtom.name}_set');
   }
 
+  final _$bcReceiverAtom = Atom(name: '_MonitorPageStore.bcReceiver');
+
+  @override
+  BluetoothCharacteristic get bcReceiver {
+    _$bcReceiverAtom.context.enforceReadPolicy(_$bcReceiverAtom);
+    _$bcReceiverAtom.reportObserved();
+    return super.bcReceiver;
+  }
+
+  @override
+  set bcReceiver(BluetoothCharacteristic value) {
+    _$bcReceiverAtom.context.conditionallyRunInAction(() {
+      super.bcReceiver = value;
+      _$bcReceiverAtom.reportChanged();
+    }, _$bcReceiverAtom, name: '${_$bcReceiverAtom.name}_set');
+  }
+
+  final _$bcTransmitterAtom = Atom(name: '_MonitorPageStore.bcTransmitter');
+
+  @override
+  BluetoothCharacteristic get bcTransmitter {
+    _$bcTransmitterAtom.context.enforceReadPolicy(_$bcTransmitterAtom);
+    _$bcTransmitterAtom.reportObserved();
+    return super.bcTransmitter;
+  }
+
+  @override
+  set bcTransmitter(BluetoothCharacteristic value) {
+    _$bcTransmitterAtom.context.conditionallyRunInAction(() {
+      super.bcTransmitter = value;
+      _$bcTransmitterAtom.reportChanged();
+    }, _$bcTransmitterAtom, name: '${_$bcTransmitterAtom.name}_set');
+  }
+
+  final _$transmitterDataStreamAtom =
+      Atom(name: '_MonitorPageStore.transmitterDataStream');
+
+  @override
+  Stream<List<int>> get transmitterDataStream {
+    _$transmitterDataStreamAtom.context
+        .enforceReadPolicy(_$transmitterDataStreamAtom);
+    _$transmitterDataStreamAtom.reportObserved();
+    return super.transmitterDataStream;
+  }
+
+  @override
+  set transmitterDataStream(Stream<List<int>> value) {
+    _$transmitterDataStreamAtom.context.conditionallyRunInAction(() {
+      super.transmitterDataStream = value;
+      _$transmitterDataStreamAtom.reportChanged();
+    }, _$transmitterDataStreamAtom,
+        name: '${_$transmitterDataStreamAtom.name}_set');
+  }
+
   final _$_MonitorPageStoreActionController =
       ActionController(name: '_MonitorPageStore');
 
@@ -140,6 +212,16 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
     final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
     try {
       return super.setSelectedBluetoothDeviceState(state);
+    } finally {
+      _$_MonitorPageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setConnectedDevices(List<BluetoothDevice> devices) {
+    final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
+    try {
+      return super.setConnectedDevices(devices);
     } finally {
       _$_MonitorPageStoreActionController.endAction(_$actionInfo);
     }
@@ -186,9 +268,39 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
   }
 
   @override
+  void setBcReceiver(BluetoothCharacteristic rx) {
+    final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
+    try {
+      return super.setBcReceiver(rx);
+    } finally {
+      _$_MonitorPageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setBcTransmitter(BluetoothCharacteristic tx) {
+    final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
+    try {
+      return super.setBcTransmitter(tx);
+    } finally {
+      _$_MonitorPageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setTransmitterDataStream(Stream<List<int>> str) {
+    final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
+    try {
+      return super.setTransmitterDataStream(str);
+    } finally {
+      _$_MonitorPageStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     final string =
-        'bluetoothState: ${bluetoothState.toString()},selectedBluetoothDevice: ${selectedBluetoothDevice.toString()},selectedBluetoothDeviceState: ${selectedBluetoothDeviceState.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()}';
+        'bluetoothState: ${bluetoothState.toString()},selectedBluetoothDevice: ${selectedBluetoothDevice.toString()},selectedBluetoothDeviceState: ${selectedBluetoothDeviceState.toString()},connectedDevices: ${connectedDevices.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()},bcReceiver: ${bcReceiver.toString()},bcTransmitter: ${bcTransmitter.toString()},transmitterDataStream: ${transmitterDataStream.toString()}';
     return '{$string}';
   }
 }

@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:knee_kinematic_monitor/stores/global_settings.dart';
+import 'package:knee_kinematic_monitor/stores/homepage.store.dart';
 import 'package:knee_kinematic_monitor/stores/monitorpage.store.dart';
+import 'package:knee_kinematic_monitor/ui/monitor/raw_data.dart';
 import 'package:knee_kinematic_monitor/ui/monitor/status_info.dart';
 import 'package:knee_kinematic_monitor/ui/streams/geolocator_stream.dart';
 import 'package:knee_kinematic_monitor/ui/streams/storage_permission_stream.dart';
@@ -19,8 +23,98 @@ class MonitorPage extends StatefulWidget {
 }
 
 class _MonitorPageState extends State<MonitorPage> {
+  void connectToPredefinedDevice(BuildContext context) {
+    final monitorPageStore = Provider.of<MonitorPageStore>(context, listen: false);
+    final homePageStore = Provider.of<HomePageStore>(context, listen: false);
+
+    if (monitorPageStore.selectedBluetoothDevice == null) {
+      widget.flutterBlue.startScan(timeout: Duration(seconds: 10)).then((sr) {
+        print("Found Something...: ");
+        for (final r in sr) {
+          print("R: $r");
+          if (r.device.name == AppGlobalSettings.deviceName) {
+            r.device.disconnect().then((v) {
+              r.device.connect().then((v) {
+                monitorPageStore.setSelectedBluetoothDevice(r.device);
+                monitorPageStore.setSelectedBluetoothDeviceState(BluetoothDeviceState.connected);
+                homePageStore.setSelectedBluetoothDevice(r.device);
+                homePageStore.setSelectedBluetoothDeviceState(BluetoothDeviceState.connected);
+                lookupForUARTService(context, r.device);
+              });
+            });
+            break;
+          }
+        }
+      });
+    }
+  }
+
+  void lookupForUARTService(BuildContext context, BluetoothDevice device) {
+    final monitorPageStore = Provider.of<MonitorPageStore>(context, listen: false);
+    final homePageStore = Provider.of<HomePageStore>(context, listen: false);
+
+    if (device.name == AppGlobalSettings.deviceName) {
+      monitorPageStore.selectedBluetoothDevice = device;
+      monitorPageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+      homePageStore.selectedBluetoothDevice = device;
+      homePageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
+
+      device.discoverServices().then((listBS) {
+        listBS.forEach((service) {
+          print("Service: " + service.uuid.toString());
+          print("--------------------");
+          if (service.uuid.toString() == AppGlobalSettings.UART_SERVICE_UUID) {
+            service.characteristics.forEach((characteristic) {
+              print("> Characteristic: " + characteristic.uuid.toString());
+              if (characteristic.uuid.toString() == AppGlobalSettings.UART_TX_CHAR_UUID) {
+                print("TRANSMITTER!");
+                monitorPageStore.setBcTransmitter(characteristic);
+                monitorPageStore.setTransmitterDataStream(characteristic.value);
+                //characteristic.setNotifyValue(!characteristic.isNotifying);
+                try {
+                  characteristic.setNotifyValue(true).then((v) {
+                    print("val: $v");
+                  }).catchError((e) {
+                    print("err: $e");
+                  }).whenComplete(() {
+                    print("completed future.");
+                  });
+                } catch (e) {
+                  print("$e");
+                }
+              }
+              if (characteristic.uuid.toString() == AppGlobalSettings.UART_RX_CHAR_UUID) {
+                print("RECEIVER!");
+                monitorPageStore.setBcReceiver(characteristic);
+                characteristic.setNotifyValue(true).then((v) {
+                  print("v: $v");
+                }).catchError((e) {
+                  print("$e");
+                }).whenComplete(() {
+                  print("comp;");
+                });
+                
+                characteristic.write(utf8.encode("hello")).then((value) {
+                  print("wrote");
+                });
+              }
+              print("> > Properties: " + characteristic.properties.toString());
+              print("> --------------------");
+              characteristic.descriptors.forEach((d) {
+                print("> > Descriptor: " + d.toString());
+              });
+              print("> --------------------");
+            });
+          }
+          //print("--------------------");
+        });
+      });
+    }
+  }
+
   void configureListeners(BuildContext context) {
     final monitorPageStore = Provider.of<MonitorPageStore>(context);
+    final homePageStore = Provider.of<HomePageStore>(context);
 
     // ------------------- Bluetooth
     widget.flutterBlue.isAvailable.then((b) {
@@ -31,22 +125,16 @@ class _MonitorPageState extends State<MonitorPage> {
 
             // ------------------ Connected Devices
             if (state == BluetoothState.on) {
-
               widget.flutterBlue.connectedDevices.then((cd) {
                 monitorPageStore.connectedDevices = cd;
-              });
-
-              widget.flutterBlue.startScan(timeout: Duration(seconds: 10)).then((sr) {
-                for (final r in sr) {
-                  if (r.device.name == AppGlobalSettings.deviceName) {
-                    r.device.disconnect().then((v) {
-                      r.device.connect().then((v) {
-                        monitorPageStore.selectedBluetoothDevice = r.device;
-                        monitorPageStore.selectedBluetoothDeviceState = BluetoothDeviceState.connected;
-                      });
-                    });
-                    break;
-                  }
+                homePageStore.connectedDevices = cd;
+                print("cd: " + cd.toString());
+                if (cd.length > 0) {
+                  cd.forEach((device) {
+                    lookupForUARTService(context, device);
+                  });
+                } else {
+                  connectToPredefinedDevice(context);
                 }
               });
             } else {
@@ -146,10 +234,8 @@ const List<Choice> choices = const <Choice>[
   const Choice(
     title: 'DADOS',
     icon: Icons.storage,
-    about: "Dados puros sendo recebidos do dispositivo",
-    content: Placeholder(
-      color: Colors.blue,
-    ),
+    about: "Dados puros sendo enviados pelo dispositivo",
+    content: RawData(),
   ),
 ];
 
