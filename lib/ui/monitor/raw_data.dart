@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:knee_kinematic_monitor/stores/global_settings.dart';
 import 'package:knee_kinematic_monitor/stores/monitorpage.store.dart';
 import 'package:provider/provider.dart';
 
@@ -19,12 +22,15 @@ class _RawDataState extends State<RawData> {
     super.dispose();
   }
 
-  interpretReceivedData(BuildContext context, String data) async {
-    if (data == "abt_HANDS_SHAKE") {
-      //Do something here or send next command to device
-      sendTransparentData(context, 'Hello');
-    } else {
-      print("Determine what to do with $data");
+  interpretReceivedData(BuildContext context, List<int> data) async {
+    final monitorPageStore = Provider.of<MonitorPageStore>(context);
+
+    String strData = utf8.decode(data);
+
+    monitorPageStore.rawDataReceivedList.add(strData);
+    if (strData.contains(AppGlobalSettings.UART_MSG_DELIMITER)) {
+      monitorPageStore.lastFullMessageReceived = monitorPageStore.rawDataReceivedList.join();
+      monitorPageStore.rawDataReceivedList.clear();
     }
   }
 
@@ -42,36 +48,112 @@ class _RawDataState extends State<RawData> {
   @override
   Widget build(BuildContext context) {
     final monitorPageStore = Provider.of<MonitorPageStore>(context);
-    theTransmmiterStream = monitorPageStore.transmitterDataStream;
+    final TextStyle textStyle = Theme.of(context).primaryTextTheme.bodyText2;
 
-    theTransmmiterStream.listen((event) {
-      print("event: $event");
-    });
-
-    Future.delayed(Duration(seconds: 2), (){
-      monitorPageStore.bcReceiver.write(utf8.encode("dataString"));
-    });
-
-    return Container(
-      child: Text(
-          "oi"), /*StreamBuilder<List<int>>(
-        stream: theStream, //here we're using our char's value
-        initialData: [],
-        builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.active) {
-            print("monitorPageStore.transmitterDataStream: "+monitorPageStore.transmitterDataStream.toString());
-            //In this method we'll interpret received data
-            print("snapshot: $snapshot");
-            print("--------------------------------------------------------");
-            print("--------------------------------------------------------");
-            print("snapshot: "+snapshot.data.toString());
-            interpretReceivedData(context, "?");
-            return Center(child: Text('We are finding the data..'));
-          } else {
-            return SizedBox();
-          }
-        },
-      ),*/
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 15.0),
+        child: Column(
+          children: <Widget>[
+            Table(
+              border: TableBorder.all(),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              defaultColumnWidth: FlexColumnWidth(1.0),
+              columnWidths: {0: FlexColumnWidth(3.0)},
+              children: [
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text("Sensor", style: textStyle)),
+                    ),
+                    Center(child: Text(" X ", style: textStyle)),
+                    Center(child: Text(" Y ", style: textStyle)),
+                    Center(child: Text(" Z ", style: textStyle)),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text("Acelerômetro", style: textStyle)),
+                    ),
+                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Text(" ? ", style: textStyle)),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text("Giroscópio", style: textStyle)),
+                    ),
+                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Text(" ? ", style: textStyle)),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text("Magnetômetro", style: textStyle)),
+                    ),
+                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Text(" ? ", style: textStyle)),
+                  ],
+                ),
+              ],
+            ),
+            Divider(
+              height: 100,
+            ),
+            Observer(
+              builder: (_) => AutoSizeText(
+                monitorPageStore.lastFullMessageReceived == null ? "-" : monitorPageStore.lastFullMessageReceived,
+                style: textStyle,
+              ),
+            ),
+            Container(
+              child: StreamBuilder<List<int>>(
+                stream: monitorPageStore.receiverValueStream, //here we're using our char's value
+                initialData: [],
+                builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.active) {
+                    //In this method we'll interpret received data
+                    print("snapshot: $snapshot");
+                    print("snapshot: " + snapshot.data.toString());
+                    print("--------------------------------------------------------");
+                    String stringData = 'Esperando por dados...';
+                    if (snapshot.hasData) {
+                      stringData = "Recebido: " + utf8.decode(snapshot.data);
+                    }
+                    print("--------------------------------------------------------");
+                    interpretReceivedData(context, snapshot.data);
+                    return AutoSizeText(
+                      stringData,
+                      style: textStyle,
+                    );
+                  } else {
+                    return SizedBox();
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
+  }
+}
+
+class RawDataWidget extends StatelessWidget {
+  const RawDataWidget({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text("oi");
   }
 }

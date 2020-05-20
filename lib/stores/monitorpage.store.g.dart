@@ -174,24 +174,24 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
     }, _$bcTransmitterAtom, name: '${_$bcTransmitterAtom.name}_set');
   }
 
-  final _$transmitterDataStreamAtom =
-      Atom(name: '_MonitorPageStore.transmitterDataStream');
+  final _$receiverValueStreamAtom =
+      Atom(name: '_MonitorPageStore.receiverValueStream');
 
   @override
-  Stream<List<int>> get transmitterDataStream {
-    _$transmitterDataStreamAtom.context
-        .enforceReadPolicy(_$transmitterDataStreamAtom);
-    _$transmitterDataStreamAtom.reportObserved();
-    return super.transmitterDataStream;
+  Stream<List<int>> get receiverValueStream {
+    _$receiverValueStreamAtom.context
+        .enforceReadPolicy(_$receiverValueStreamAtom);
+    _$receiverValueStreamAtom.reportObserved();
+    return super.receiverValueStream;
   }
 
   @override
-  set transmitterDataStream(Stream<List<int>> value) {
-    _$transmitterDataStreamAtom.context.conditionallyRunInAction(() {
-      super.transmitterDataStream = value;
-      _$transmitterDataStreamAtom.reportChanged();
-    }, _$transmitterDataStreamAtom,
-        name: '${_$transmitterDataStreamAtom.name}_set');
+  set receiverValueStream(Stream<List<int>> value) {
+    _$receiverValueStreamAtom.context.conditionallyRunInAction(() {
+      super.receiverValueStream = value;
+      _$receiverValueStreamAtom.reportChanged();
+    }, _$receiverValueStreamAtom,
+        name: '${_$receiverValueStreamAtom.name}_set');
   }
 
   final _$_MonitorPageStoreActionController =
@@ -288,10 +288,10 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
   }
 
   @override
-  void setTransmitterDataStream(Stream<List<int>> str) {
+  void setReceiverValueStream(Stream<List<int>> str) {
     final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
     try {
-      return super.setTransmitterDataStream(str);
+      return super.setReceiverValueStream(str);
     } finally {
       _$_MonitorPageStoreActionController.endAction(_$actionInfo);
     }
@@ -300,7 +300,7 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
   @override
   String toString() {
     final string =
-        'bluetoothState: ${bluetoothState.toString()},selectedBluetoothDevice: ${selectedBluetoothDevice.toString()},selectedBluetoothDeviceState: ${selectedBluetoothDeviceState.toString()},connectedDevices: ${connectedDevices.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()},bcReceiver: ${bcReceiver.toString()},bcTransmitter: ${bcTransmitter.toString()},transmitterDataStream: ${transmitterDataStream.toString()}';
+        'bluetoothState: ${bluetoothState.toString()},selectedBluetoothDevice: ${selectedBluetoothDevice.toString()},selectedBluetoothDeviceState: ${selectedBluetoothDeviceState.toString()},connectedDevices: ${connectedDevices.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()},bcReceiver: ${bcReceiver.toString()},bcTransmitter: ${bcTransmitter.toString()},receiverValueStream: ${receiverValueStream.toString()}';
     return '{$string}';
   }
 }

@@ -11,6 +11,7 @@ abstract class AppGlobalSettings {
   static const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
   static const UART_TX_CHAR_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
   static const UART_RX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+  static const UART_MSG_DELIMITER = "#";
 
 
 }

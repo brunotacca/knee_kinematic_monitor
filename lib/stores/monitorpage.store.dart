@@ -68,7 +68,10 @@ abstract class _MonitorPageStore with Store {
   @observable
   BluetoothCharacteristic bcTransmitter;
   @observable
-  Stream<List<int>> transmitterDataStream;
+  Stream<List<int>> receiverValueStream;
+  @observable
+  String lastFullMessageReceived;
+  List<String> rawDataReceivedList;
 
   @action
   void setBcReceiver(BluetoothCharacteristic rx) {
@@ -79,8 +82,12 @@ abstract class _MonitorPageStore with Store {
     bcTransmitter = tx;
   }
   @action
-  void setTransmitterDataStream(Stream<List<int>> str) {
-    transmitterDataStream = str;
+  void setReceiverValueStream(Stream<List<int>> str) {
+    receiverValueStream = str;
+  }
+  @action
+  void setLastFullMessageReceived(String msg) {
+    lastFullMessageReceived = msg;
   }
 
 }

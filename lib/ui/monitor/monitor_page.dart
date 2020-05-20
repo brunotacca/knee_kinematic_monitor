@@ -20,15 +20,13 @@ class MonitorPage extends StatefulWidget {
 
   @override
   _MonitorPageState createState() => _MonitorPageState();
-}
 
-class _MonitorPageState extends State<MonitorPage> {
   void connectToPredefinedDevice(BuildContext context) {
     final monitorPageStore = Provider.of<MonitorPageStore>(context, listen: false);
     final homePageStore = Provider.of<HomePageStore>(context, listen: false);
 
     if (monitorPageStore.selectedBluetoothDevice == null) {
-      widget.flutterBlue.startScan(timeout: Duration(seconds: 10)).then((sr) {
+      flutterBlue.startScan(timeout: Duration(seconds: 10)).then((sr) {
         print("Found Something...: ");
         for (final r in sr) {
           print("R: $r");
@@ -61,49 +59,73 @@ class _MonitorPageState extends State<MonitorPage> {
 
       device.discoverServices().then((listBS) {
         listBS.forEach((service) {
-          print("Service: " + service.uuid.toString());
-          print("--------------------");
+          //print("Service: " + service.uuid.toString());
+          //print("--------------------");
           if (service.uuid.toString() == AppGlobalSettings.UART_SERVICE_UUID) {
             service.characteristics.forEach((characteristic) {
-              print("> Characteristic: " + characteristic.uuid.toString());
+              //print("> Characteristic: " + characteristic.uuid.toString());
               if (characteristic.uuid.toString() == AppGlobalSettings.UART_TX_CHAR_UUID) {
-                print("TRANSMITTER!");
                 monitorPageStore.setBcTransmitter(characteristic);
-                monitorPageStore.setTransmitterDataStream(characteristic.value);
                 //characteristic.setNotifyValue(!characteristic.isNotifying);
-                try {
-                  characteristic.setNotifyValue(true).then((v) {
-                    print("val: $v");
+                /*
+                print("TRANSMITTER!");
+                characteristic.setNotifyValue(true).then((v) {
+                  print("TRANSMITTER val: $v");
+                }).catchError((e) {
+                  print("TRANSMITTER err: $e");
+                }).whenComplete(() {
+                  print("TRANSMITTER completed future.");
+                });
+
+                Future.delayed(Duration(seconds: 5), (){
+                  characteristic.write(utf8.encode("hello"), withoutResponse: true).then((value) {
+                    print("RECEIVER wrote");
                   }).catchError((e) {
-                    print("err: $e");
+                    print("RECEIVER err: $e");
                   }).whenComplete(() {
-                    print("completed future.");
+                    print("RECEIVER completed future.");
                   });
-                } catch (e) {
-                  print("$e");
-                }
+                });
+                */
               }
               if (characteristic.uuid.toString() == AppGlobalSettings.UART_RX_CHAR_UUID) {
-                print("RECEIVER!");
                 monitorPageStore.setBcReceiver(characteristic);
+                characteristic.setNotifyValue(true);
+                monitorPageStore.setReceiverValueStream(characteristic.value);
+                /*
+                print("RECEIVER!");
                 characteristic.setNotifyValue(true).then((v) {
-                  print("v: $v");
+                  print("RECEIVER v: $v");
                 }).catchError((e) {
-                  print("$e");
+                  print("RECEIVER err: $e");
                 }).whenComplete(() {
-                  print("comp;");
+                  print("RECEIVER completed future;");
                 });
-                
+
+                characteristic.value.listen((event) {
+                  print("value: "+utf8.decode(event));
+                  //event.map((e) => utf8.decode(e));
+                });
+
                 characteristic.write(utf8.encode("hello")).then((value) {
-                  print("wrote");
+                  print("RECEIVER wrote");
+                }).catchError((e) {
+                  print("RECEIVER err: $e");
+                }).whenComplete(() {
+                  print("RECEIVER completed future.");
                 });
+                */
               }
+              /*
               print("> > Properties: " + characteristic.properties.toString());
               print("> --------------------");
               characteristic.descriptors.forEach((d) {
                 print("> > Descriptor: " + d.toString());
               });
+              
               print("> --------------------");
+              */
+              
             });
           }
           //print("--------------------");
@@ -111,7 +133,9 @@ class _MonitorPageState extends State<MonitorPage> {
       });
     }
   }
+}
 
+class _MonitorPageState extends State<MonitorPage> {
   void configureListeners(BuildContext context) {
     final monitorPageStore = Provider.of<MonitorPageStore>(context);
     final homePageStore = Provider.of<HomePageStore>(context);
@@ -131,10 +155,10 @@ class _MonitorPageState extends State<MonitorPage> {
                 print("cd: " + cd.toString());
                 if (cd.length > 0) {
                   cd.forEach((device) {
-                    lookupForUARTService(context, device);
+                    widget.lookupForUARTService(context, device);
                   });
                 } else {
-                  connectToPredefinedDevice(context);
+                  widget.connectToPredefinedDevice(context);
                 }
               });
             } else {
