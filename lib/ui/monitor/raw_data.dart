@@ -1,10 +1,6 @@
-import 'dart:convert';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:knee_kinematic_monitor/stores/global_settings.dart';
 import 'package:knee_kinematic_monitor/stores/monitorpage.store.dart';
 import 'package:provider/provider.dart';
 
@@ -18,32 +14,8 @@ class RawData extends StatefulWidget {
 class _RawDataState extends State<RawData> {
   @override
   void dispose() {
-    theTransmmiterStream = null;
     super.dispose();
   }
-
-  interpretReceivedData(BuildContext context, List<int> data) async {
-    final monitorPageStore = Provider.of<MonitorPageStore>(context);
-
-    String strData = utf8.decode(data);
-
-    monitorPageStore.rawDataReceivedList.add(strData);
-    if (strData.contains(AppGlobalSettings.UART_MSG_DELIMITER)) {
-      monitorPageStore.lastFullMessageReceived = monitorPageStore.rawDataReceivedList.join();
-      monitorPageStore.rawDataReceivedList.clear();
-    }
-  }
-
-  sendTransparentData(BuildContext context, String dataString) async {
-    final monitorPageStore = Provider.of<MonitorPageStore>(context);
-    //Encoding the string
-    List<int> data = utf8.encode(dataString);
-    if (monitorPageStore.selectedBluetoothDeviceState == BluetoothDeviceState.connected) {
-      await monitorPageStore.bcReceiver.write(data);
-    }
-  }
-
-  Stream<List<int>> theTransmmiterStream;
 
   @override
   Widget build(BuildContext context) {
@@ -78,9 +50,9 @@ class _RawDataState extends State<RawData> {
                       padding: const EdgeInsets.all(8.0),
                       child: Center(child: Text("Acelerômetro", style: textStyle)),
                     ),
-                    Center(child: Text(" ? ", style: textStyle)),
-                    Center(child: Text(" ? ", style: textStyle)),
-                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.accelX.toString(), style: textStyle))),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.accelY.toString(), style: textStyle))),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.accelZ.toString(), style: textStyle))),
                   ],
                 ),
                 TableRow(
@@ -89,9 +61,9 @@ class _RawDataState extends State<RawData> {
                       padding: const EdgeInsets.all(8.0),
                       child: Center(child: Text("Giroscópio", style: textStyle)),
                     ),
-                    Center(child: Text(" ? ", style: textStyle)),
-                    Center(child: Text(" ? ", style: textStyle)),
-                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.gyrosX.toString(), style: textStyle))),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.gyrosY.toString(), style: textStyle))),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.gyrosZ.toString(), style: textStyle))),
                   ],
                 ),
                 TableRow(
@@ -100,38 +72,38 @@ class _RawDataState extends State<RawData> {
                       padding: const EdgeInsets.all(8.0),
                       child: Center(child: Text("Magnetômetro", style: textStyle)),
                     ),
-                    Center(child: Text(" ? ", style: textStyle)),
-                    Center(child: Text(" ? ", style: textStyle)),
-                    Center(child: Text(" ? ", style: textStyle)),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.magneX.toString(), style: textStyle))),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.magneY.toString(), style: textStyle))),
+                    Center(child: Observer(builder: (_) => Text(monitorPageStore.lastSensorMessage.magneZ.toString(), style: textStyle))),
                   ],
                 ),
               ],
             ),
-            Divider(
-              height: 100,
-            ),
+            Spacer(),
+            Text("Last message received:", style: textStyle),
             Observer(
               builder: (_) => AutoSizeText(
-                monitorPageStore.lastFullMessageReceived == null ? "-" : monitorPageStore.lastFullMessageReceived,
+                monitorPageStore.lastSensorMessage == null ? "-" : monitorPageStore.lastSensorMessage.rawMsg,
                 style: textStyle,
               ),
             ),
-            Container(
+            /*Container(
               child: StreamBuilder<List<int>>(
-                stream: monitorPageStore.receiverValueStream, //here we're using our char's value
+                stream: monitorPageStore.receiverValueStream, 
                 initialData: [],
                 builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
+                  print("snapshot: $snapshot");
+                  print("snapshot: " + snapshot.data.toString());
                   if (snapshot.connectionState == ConnectionState.active) {
                     //In this method we'll interpret received data
-                    print("snapshot: $snapshot");
-                    print("snapshot: " + snapshot.data.toString());
                     print("--------------------------------------------------------");
                     String stringData = 'Esperando por dados...';
                     if (snapshot.hasData) {
                       stringData = "Recebido: " + utf8.decode(snapshot.data);
                     }
+                    print("Data: " + stringData);
                     print("--------------------------------------------------------");
-                    interpretReceivedData(context, snapshot.data);
+                    //interpretReceivedData(context, snapshot.data);
                     return AutoSizeText(
                       stringData,
                       style: textStyle,
@@ -141,7 +113,7 @@ class _RawDataState extends State<RawData> {
                   }
                 },
               ),
-            ),
+            ),*/
           ],
         ),
       ),

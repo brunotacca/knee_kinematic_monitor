@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
@@ -63,7 +65,7 @@ class MonitorPage extends StatefulWidget {
             service.characteristics.forEach((characteristic) {
               //print("> Characteristic: " + characteristic.uuid.toString());
               if (characteristic.uuid.toString() == AppGlobalSettings.UART_TX_CHAR_UUID) {
-                monitorPageStore.setBcTransmitter(characteristic);
+                monitorPageStore.bcTransmitter = characteristic;
                 //characteristic.setNotifyValue(!characteristic.isNotifying);
                 /*
                 print("TRANSMITTER!");
@@ -87,9 +89,19 @@ class MonitorPage extends StatefulWidget {
                 */
               }
               if (characteristic.uuid.toString() == AppGlobalSettings.UART_RX_CHAR_UUID) {
-                monitorPageStore.setBcReceiver(characteristic);
+                monitorPageStore.bcReceiver = characteristic;
                 characteristic.setNotifyValue(true);
-                monitorPageStore.setReceiverValueStream(characteristic.value);
+                monitorPageStore.receiverValueStream = characteristic.value;
+                if (monitorPageStore.receiverValueStreamSubscription != null) {
+                  monitorPageStore.receiverValueStreamSubscription.cancel();
+                  monitorPageStore.receiverValueStreamSubscription = null;
+                }
+                print("HERE");
+                monitorPageStore.receiverValueStreamSubscription = monitorPageStore.receiverValueStream.listen((event) {
+                  //print("event: " + utf8.decode(event));
+                  interpretReceivedData(context, event);
+                });
+
                 /*
                 print("RECEIVER!");
                 characteristic.setNotifyValue(true).then((v) {
@@ -123,7 +135,6 @@ class MonitorPage extends StatefulWidget {
               
               print("> --------------------");
               */
-              
             });
           }
           //print("--------------------");
@@ -131,11 +142,38 @@ class MonitorPage extends StatefulWidget {
       });
     }
   }
+
+  interpretReceivedData(BuildContext context, List<int> data) {
+    final monitorPageStore = Provider.of<MonitorPageStore>(context, listen: false);
+
+    if (data.contains(0)) {
+      data[data.lastIndexOf(0)] = 32; // swap null terminator (0) to space (32)
+    }
+
+    String strData = utf8.decode(data).trim();
+    monitorPageStore.rawDataReceivedList.add(strData);
+    if (strData.contains(AppGlobalSettings.UART_MSG_DELIMITER)) {
+      monitorPageStore.setLastFullMessageReceived(monitorPageStore.rawDataReceivedList.join());
+      monitorPageStore.rawDataReceivedList.clear();
+    }
+  }
 }
 
 class _MonitorPageState extends State<MonitorPage> {
+  MonitorPageStore monitorStore;
+
+  @override
+  void dispose() {
+    if (monitorStore != null && monitorStore.receiverValueStreamSubscription != null) {
+      monitorStore.receiverValueStreamSubscription.cancel();
+      monitorStore.receiverValueStreamSubscription = null;
+    }
+    super.dispose();
+  }
+
   void configureListeners(BuildContext context) {
     final monitorPageStore = Provider.of<MonitorPageStore>(context);
+    monitorStore = monitorPageStore;
     final homePageStore = Provider.of<HomePageStore>(context);
 
     // ------------------- Bluetooth

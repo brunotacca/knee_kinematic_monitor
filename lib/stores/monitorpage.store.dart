@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:knee_kinematic_monitor/model/sensor_message.dart';
 import 'package:mobx/mobx.dart';
 
 part 'monitorpage.store.g.dart';
@@ -7,7 +10,6 @@ part 'monitorpage.store.g.dart';
 class MonitorPageStore = _MonitorPageStore with _$MonitorPageStore;
 
 abstract class _MonitorPageStore with Store {
-  
   String lastDeviceConnectedId = "";
 
   @observable
@@ -63,31 +65,22 @@ abstract class _MonitorPageStore with Store {
     locationServiceEnabled = status;
   }
 
-  @observable
   BluetoothCharacteristic bcReceiver;
-  @observable
   BluetoothCharacteristic bcTransmitter;
-  @observable
   Stream<List<int>> receiverValueStream;
+  StreamSubscription receiverValueStreamSubscription;
+
+  List<String> rawDataReceivedList = [];
   @observable
   String lastFullMessageReceived;
-  List<String> rawDataReceivedList;
 
-  @action
-  void setBcReceiver(BluetoothCharacteristic rx) {
-    bcReceiver = rx;
-  }
-  @action
-  void setBcTransmitter(BluetoothCharacteristic tx) {
-    bcTransmitter = tx;
-  }
-  @action
-  void setReceiverValueStream(Stream<List<int>> str) {
-    receiverValueStream = str;
-  }
   @action
   void setLastFullMessageReceived(String msg) {
     lastFullMessageReceived = msg;
   }
 
+  @computed
+  SensorMessage get lastSensorMessage {
+    return SensorMessage(lastFullMessageReceived);
+  }
 }

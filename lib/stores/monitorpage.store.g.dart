@@ -9,6 +9,13 @@ part of 'monitorpage.store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$MonitorPageStore on _MonitorPageStore, Store {
+  Computed<SensorMessage> _$lastSensorMessageComputed;
+
+  @override
+  SensorMessage get lastSensorMessage => (_$lastSensorMessageComputed ??=
+          Computed<SensorMessage>(() => super.lastSensorMessage))
+      .value;
+
   final _$bluetoothStateAtom = Atom(name: '_MonitorPageStore.bluetoothState');
 
   @override
@@ -140,58 +147,24 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
     }, _$storagePermissionAtom, name: '${_$storagePermissionAtom.name}_set');
   }
 
-  final _$bcReceiverAtom = Atom(name: '_MonitorPageStore.bcReceiver');
+  final _$lastFullMessageReceivedAtom =
+      Atom(name: '_MonitorPageStore.lastFullMessageReceived');
 
   @override
-  BluetoothCharacteristic get bcReceiver {
-    _$bcReceiverAtom.context.enforceReadPolicy(_$bcReceiverAtom);
-    _$bcReceiverAtom.reportObserved();
-    return super.bcReceiver;
+  String get lastFullMessageReceived {
+    _$lastFullMessageReceivedAtom.context
+        .enforceReadPolicy(_$lastFullMessageReceivedAtom);
+    _$lastFullMessageReceivedAtom.reportObserved();
+    return super.lastFullMessageReceived;
   }
 
   @override
-  set bcReceiver(BluetoothCharacteristic value) {
-    _$bcReceiverAtom.context.conditionallyRunInAction(() {
-      super.bcReceiver = value;
-      _$bcReceiverAtom.reportChanged();
-    }, _$bcReceiverAtom, name: '${_$bcReceiverAtom.name}_set');
-  }
-
-  final _$bcTransmitterAtom = Atom(name: '_MonitorPageStore.bcTransmitter');
-
-  @override
-  BluetoothCharacteristic get bcTransmitter {
-    _$bcTransmitterAtom.context.enforceReadPolicy(_$bcTransmitterAtom);
-    _$bcTransmitterAtom.reportObserved();
-    return super.bcTransmitter;
-  }
-
-  @override
-  set bcTransmitter(BluetoothCharacteristic value) {
-    _$bcTransmitterAtom.context.conditionallyRunInAction(() {
-      super.bcTransmitter = value;
-      _$bcTransmitterAtom.reportChanged();
-    }, _$bcTransmitterAtom, name: '${_$bcTransmitterAtom.name}_set');
-  }
-
-  final _$receiverValueStreamAtom =
-      Atom(name: '_MonitorPageStore.receiverValueStream');
-
-  @override
-  Stream<List<int>> get receiverValueStream {
-    _$receiverValueStreamAtom.context
-        .enforceReadPolicy(_$receiverValueStreamAtom);
-    _$receiverValueStreamAtom.reportObserved();
-    return super.receiverValueStream;
-  }
-
-  @override
-  set receiverValueStream(Stream<List<int>> value) {
-    _$receiverValueStreamAtom.context.conditionallyRunInAction(() {
-      super.receiverValueStream = value;
-      _$receiverValueStreamAtom.reportChanged();
-    }, _$receiverValueStreamAtom,
-        name: '${_$receiverValueStreamAtom.name}_set');
+  set lastFullMessageReceived(String value) {
+    _$lastFullMessageReceivedAtom.context.conditionallyRunInAction(() {
+      super.lastFullMessageReceived = value;
+      _$lastFullMessageReceivedAtom.reportChanged();
+    }, _$lastFullMessageReceivedAtom,
+        name: '${_$lastFullMessageReceivedAtom.name}_set');
   }
 
   final _$_MonitorPageStoreActionController =
@@ -268,30 +241,10 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
   }
 
   @override
-  void setBcReceiver(BluetoothCharacteristic rx) {
+  void setLastFullMessageReceived(String msg) {
     final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
     try {
-      return super.setBcReceiver(rx);
-    } finally {
-      _$_MonitorPageStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void setBcTransmitter(BluetoothCharacteristic tx) {
-    final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
-    try {
-      return super.setBcTransmitter(tx);
-    } finally {
-      _$_MonitorPageStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void setReceiverValueStream(Stream<List<int>> str) {
-    final _$actionInfo = _$_MonitorPageStoreActionController.startAction();
-    try {
-      return super.setReceiverValueStream(str);
+      return super.setLastFullMessageReceived(msg);
     } finally {
       _$_MonitorPageStoreActionController.endAction(_$actionInfo);
     }
@@ -300,7 +253,7 @@ mixin _$MonitorPageStore on _MonitorPageStore, Store {
   @override
   String toString() {
     final string =
-        'bluetoothState: ${bluetoothState.toString()},selectedBluetoothDevice: ${selectedBluetoothDevice.toString()},selectedBluetoothDeviceState: ${selectedBluetoothDeviceState.toString()},connectedDevices: ${connectedDevices.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()},bcReceiver: ${bcReceiver.toString()},bcTransmitter: ${bcTransmitter.toString()},receiverValueStream: ${receiverValueStream.toString()}';
+        'bluetoothState: ${bluetoothState.toString()},selectedBluetoothDevice: ${selectedBluetoothDevice.toString()},selectedBluetoothDeviceState: ${selectedBluetoothDeviceState.toString()},connectedDevices: ${connectedDevices.toString()},locationServiceEnabled: ${locationServiceEnabled.toString()},geolocationStatus: ${geolocationStatus.toString()},storagePermission: ${storagePermission.toString()},lastFullMessageReceived: ${lastFullMessageReceived.toString()},lastSensorMessage: ${lastSensorMessage.toString()}';
     return '{$string}';
   }
 }
