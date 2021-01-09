@@ -28,12 +28,15 @@ class _LoadingPageState extends State<LoadingPage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var startSettingsDone = prefs.getBool('startSettingsDone');
-    homePageStore.setStartSettingsDone(startSettingsDone != null ? startSettingsDone : false);
+    homePageStore.setStartSettingsDone(
+        startSettingsDone != null ? startSettingsDone : false);
 
-    if (startSettingsDone) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MonitorPage()));
+    if (startSettingsDone != null && startSettingsDone) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => MonitorPage()));
     } else {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => HomePage()));
     }
   }
 
@@ -76,7 +79,8 @@ class _LoadingPageState extends State<LoadingPage> {
                     height: 150,
                     width: 150,
                     child: CircularProgressIndicator(
-                      valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
+                      valueColor:
+                          new AlwaysStoppedAnimation<Color>(Colors.green),
                     ),
                   ),
                   Divider(

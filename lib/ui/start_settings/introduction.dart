@@ -41,7 +41,7 @@ class _IntroductionPageState extends State<IntroductionPage> {
   int _current = AppGlobalSettings.countdownDuration;
   CountdownTimer countDownTimer = new CountdownTimer(
     new Duration(seconds: _start),
-    new Duration(seconds: 1),
+    new Duration(seconds: 2),
   );
   StreamSubscription<CountdownTimer> countdownSubscriber;
 
@@ -68,17 +68,17 @@ class _IntroductionPageState extends State<IntroductionPage> {
 
     SharedPreferences.getInstance().then((sp) {
       var v = sp.getBool("startSettingsDone");
-      if (v) {
+      if (v != null && v) {
         homePageStore.setIntroductionPageDone(true);
         setState(() {
           _current = 0;
         });
-        homePageStore.setBodyPlacementPageDone(true);
       } else {
         Future.delayed(Duration(milliseconds: 500), () {
           if (countdownSubscriber == null &&
               !homePageStore.introductionPageDone &&
-              homePageStore.currentPageIndex == homePageStore.introductionPageIndex) {
+              homePageStore.currentPageIndex ==
+                  homePageStore.introductionPageIndex) {
             startTimer(context);
           }
         });
@@ -127,7 +127,8 @@ An dubium est, quin virtus ita maximam partem optineat in rebus humanis, ut reli
           child: ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(15.0)),
             child: Container(
-              constraints: BoxConstraints.tight(Size((homePageStore.introductionPageDone ? 50.0 : 80.0), 40.0)),
+              constraints: BoxConstraints.tight(Size(
+                  (homePageStore.introductionPageDone ? 50.0 : 80.0), 40.0)),
               color: Theme.of(context).primaryColor,
               child: Row(
                 children: <Widget>[
@@ -135,14 +136,21 @@ An dubium est, quin virtus ita maximam partem optineat in rebus humanis, ut reli
                   (homePageStore.introductionPageDone
                       ? Container()
                       : Text(
-                          ((_current > 0 && !homePageStore.introductionPageDone) ? "$_current" : ""),
-                          style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
+                          ((_current > 0 && !homePageStore.introductionPageDone)
+                              ? "$_current"
+                              : ""),
+                          style: Theme.of(context)
+                              .primaryTextTheme
+                              .subtitle1
+                              .copyWith(color: Colors.white),
                         )),
                   IconButton(
                     icon: Observer(
                       builder: (_) => Icon(
                         Icons.arrow_forward_ios,
-                        color: (homePageStore.introductionPageDone ? Colors.lightGreenAccent : Colors.white),
+                        color: (homePageStore.introductionPageDone
+                            ? Colors.lightGreenAccent
+                            : Colors.white),
                       ),
                     ),
                     onPressed: () {

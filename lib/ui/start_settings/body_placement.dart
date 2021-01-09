@@ -41,7 +41,7 @@ class _BodyPlacementSettingState extends State<BodyPlacementSetting> {
   int _current = AppGlobalSettings.countdownDuration;
   CountdownTimer countDownTimer = new CountdownTimer(
     new Duration(seconds: _start),
-    new Duration(seconds: 1),
+    new Duration(seconds: 5),
   );
   StreamSubscription<CountdownTimer> countdownSubscriber;
 
@@ -50,7 +50,7 @@ class _BodyPlacementSettingState extends State<BodyPlacementSetting> {
 
     countDownTimer = new CountdownTimer(
       new Duration(seconds: _start),
-      new Duration(seconds: 1),
+      new Duration(seconds: 2),
     );
 
     countdownSubscriber = countDownTimer.listen(null);
@@ -73,13 +73,17 @@ class _BodyPlacementSettingState extends State<BodyPlacementSetting> {
 
     SharedPreferences.getInstance().then((sp) {
       var v = sp.getBool("startSettingsDone");
-      if (v) {
+      if (v != null && v) {
         homePageStore.setBodyPlacementPageDone(true);
+        setState(() {
+          _current = 0;
+        });
       } else {
         Future.delayed(Duration(milliseconds: 500), () {
           if (countdownSubscriber == null &&
-              !homePageStore.introductionPageDone &&
-              homePageStore.currentPageIndex == homePageStore.introductionPageIndex) {
+              !homePageStore.bodyPlacementPageDone &&
+              homePageStore.currentPageIndex ==
+                  homePageStore.bodyPlacementPageIndex) {
             startTimer(context);
           }
         });
@@ -128,7 +132,8 @@ An dubium est, quin virtus ita maximam partem optineat in rebus humanis, ut reli
           child: ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(15.0)),
             child: Container(
-              constraints: BoxConstraints.tight(Size((homePageStore.bodyPlacementPageDone ? 50.0 : 80.0), 40.0)),
+              constraints: BoxConstraints.tight(Size(
+                  (homePageStore.bodyPlacementPageDone ? 50.0 : 80.0), 40.0)),
               color: Theme.of(context).primaryColor,
               child: Row(
                 children: <Widget>[
@@ -136,14 +141,22 @@ An dubium est, quin virtus ita maximam partem optineat in rebus humanis, ut reli
                   (homePageStore.bodyPlacementPageDone
                       ? Container()
                       : Text(
-                          ((_current > 0 && !homePageStore.bodyPlacementPageDone) ? "$_current" : ""),
-                          style: Theme.of(context).primaryTextTheme.subtitle1.copyWith(color: Colors.white),
+                          ((_current > 0 &&
+                                  !homePageStore.bodyPlacementPageDone)
+                              ? "$_current"
+                              : ""),
+                          style: Theme.of(context)
+                              .primaryTextTheme
+                              .subtitle1
+                              .copyWith(color: Colors.white),
                         )),
                   IconButton(
                     icon: Observer(
                       builder: (_) => Icon(
                         Icons.arrow_forward_ios,
-                        color: (homePageStore.bodyPlacementPageDone ? Colors.lightGreenAccent : Colors.white),
+                        color: (homePageStore.bodyPlacementPageDone
+                            ? Colors.lightGreenAccent
+                            : Colors.white),
                       ),
                     ),
                     onPressed: () {
